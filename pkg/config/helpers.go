@@ -89,8 +89,8 @@ func genEnvConfig(cfg any) []byte {
 
 	builder := new(strings.Builder)
 
-	writer := newIndent(builder, 2)
-	genEnvConfigRecursively(writer, _type)
+	writer := newIndent(builder, 0)
+	genEnvConfigRecursively(builder, _type)
 
 	return writer.Bytes()
 }

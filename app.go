@@ -1,16 +1,20 @@
-package app
+package gocherry
 
 import (
 	"context"
+	"flag"
 	"log/slog"
+	"os"
 
+	"github.com/vishenosik/gocherry/pkg/config"
+	"github.com/vishenosik/gocherry/pkg/http"
 	"github.com/vishenosik/gocherry/pkg/logs"
 
 	webctx "github.com/vishenosik/web/context"
 )
 
 type App struct {
-	log      *slog.Logger
+	Log      *slog.Logger
 	services []Service
 }
 
@@ -26,7 +30,7 @@ func NewApp(opts ...AppOption) (*App, error) {
 	log := logs.SetupLogger()
 
 	app := &App{
-		log: log,
+		Log: log,
 	}
 
 	for _, opt := range opts {
@@ -38,7 +42,7 @@ func NewApp(opts ...AppOption) (*App, error) {
 
 func (app *App) Start(ctx context.Context) error {
 
-	app.log.Info("start app")
+	app.Log.Info("start app")
 
 	for _, service := range app.services {
 		go service.Start(ctx)
@@ -53,20 +57,42 @@ func (app *App) AddServices(services ...Service) {
 	app.services = append(app.services, services...)
 }
 
-func (app *App) Stop(ctx context.Context) {
+func (app *App) Stop(ctx context.Context) error {
 
 	const msg = "app stopping"
 
 	signal, ok := webctx.StopFromCtx(ctx)
 	if ok {
-		app.log.Info(msg, slog.String("signal", signal.Signal.String()))
+		app.Log.Info(msg, slog.String("signal", signal.Signal.String()))
 	} else {
-		app.log.Info(msg)
+		app.Log.Info(msg)
 	}
 
 	for _, service := range app.services {
 		service.Stop(ctx)
 	}
 
-	app.log.Info("app stopped")
+	app.Log.Info("app stopped")
+	return nil
+}
+
+func Flags() {
+
+	structs := []any{
+		logs.EnvConfig{},
+		http.EnvConfig{},
+	}
+
+	flag.BoolFunc(
+		"config.info",
+		"Show config schema information",
+		config.ConfigInfo(os.Stdout, structs...),
+	)
+
+	flag.Func(
+		"config.doc",
+		"Update config example in docs",
+		config.ConfigDoc(structs...),
+	)
+
 }

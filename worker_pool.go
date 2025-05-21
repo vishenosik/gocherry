@@ -1,4 +1,4 @@
-package app
+package gocherry
 
 import (
 	"context"
@@ -36,15 +36,19 @@ func NewPoolContext(ctx context.Context, log *slog.Logger, subscriptions ...chan
 		subChan: concurrency.MergeChannels(ctx, uint16(1024), subscriptions...),
 	}
 
-	log.Warn("incomin", slog.Int("len", len(pool.subChan)))
-
 	return pool, nil
 }
 
 func (p *Pool) Start(ctx context.Context) error {
 	p.pool.Start(ctx)
 
-	p.log.Info("pool started", slog.Any("metrics", p.pool.GetMetrics()))
+	metrics := p.pool.GetMetrics()
+
+	p.log.Info("pool started",
+		slog.Int("workers_current", int(metrics.WorkersCurrent)),
+		slog.Int("workers_max", int(metrics.WorkersMax)),
+		slog.Int("workers_min", int(metrics.WorkersMin)),
+	)
 
 	go func() {
 		for task := range p.subChan {
