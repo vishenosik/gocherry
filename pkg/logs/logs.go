@@ -19,12 +19,12 @@ const (
 )
 
 type EnvConfig struct {
-	Env string `env:"ENV" default:"dev" validate:"oneof=dev prod test" desc:"The environment in which the application is running"`
+	Env string `env:"ENV" default:"dev" desc:"The environment in which the application is running"`
 }
 
 type Config struct {
-	Env        string
-	Marshaller string
+	Env        string `validate:"oneof=dev prod test"`
+	Marshaller string `validate:"oneof=json yaml"`
 }
 
 func validateConfig(conf Config) error {
