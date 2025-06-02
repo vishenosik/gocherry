@@ -1,4 +1,4 @@
-package app
+package gocherry
 
 import (
 	"context"
@@ -21,14 +21,16 @@ type Pool struct {
 	subChan <-chan PoolTask
 }
 
-func NewPool(log *slog.Logger, subscriptions ...chan PoolTask) (*Pool, error) {
-	return NewPoolContext(context.Background(), log, subscriptions...)
+func NewPool(subscriptions ...chan PoolTask) (*Pool, error) {
+	return NewPoolContext(context.Background(), subscriptions...)
 }
 
-func NewPoolContext(ctx context.Context, log *slog.Logger, subscriptions ...chan PoolTask) (*Pool, error) {
+func NewPoolContext(ctx context.Context, subscriptions ...chan PoolTask) (*Pool, error) {
 	if len(subscriptions) == 0 {
 		return nil, errors.New("no subscriptions provided")
 	}
+
+	log := logs.SetupLogger().With(logs.AppComponent("worker pool"))
 
 	pool := &Pool{
 		log:     log,
@@ -36,15 +38,19 @@ func NewPoolContext(ctx context.Context, log *slog.Logger, subscriptions ...chan
 		subChan: concurrency.MergeChannels(ctx, uint16(1024), subscriptions...),
 	}
 
-	log.Warn("incomin", slog.Int("len", len(pool.subChan)))
-
 	return pool, nil
 }
 
 func (p *Pool) Start(ctx context.Context) error {
 	p.pool.Start(ctx)
 
-	p.log.Info("pool started", slog.Any("metrics", p.pool.GetMetrics()))
+	metrics := p.pool.GetMetrics()
+
+	p.log.Info("pool started",
+		slog.Int("workers_current", int(metrics.WorkersCurrent)),
+		slog.Int("workers_max", int(metrics.WorkersMax)),
+		slog.Int("workers_min", int(metrics.WorkersMin)),
+	)
 
 	go func() {
 		for task := range p.subChan {

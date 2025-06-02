@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -18,6 +19,10 @@ func (srv Server) Validate() error {
 		return err
 	}
 	return nil
+}
+
+func (srv Server) String() string {
+	return fmt.Sprintf("%s:%d", srv.Host, srv.Port)
 }
 
 type Credentials struct {

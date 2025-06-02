@@ -1,4 +1,4 @@
-package app
+package gocherry
 
 import (
 	"net/http"
@@ -10,24 +10,30 @@ import (
 func WithHttpRoutes(handler http.Handler) AppOption {
 	return func(app *App) {
 		if handler == nil {
-			app.log.Warn("failed to add http service: handler is nil")
+			app.Log.Warn("failed to add http service: handler is nil")
 			return
 		}
-		app.AddServices(_http.NewHttpServer(
-			app.log.With(logs.AppComponent("http")),
+
+		server, err := _http.NewHttpServer(
 			handler,
-		))
+		)
+
+		if err != nil {
+			app.Log.Warn("failed to add http service", logs.Error(err))
+			return
+		}
+
+		app.AddServices(server)
 	}
 }
 
 func WithWorkerPool(subscriptions ...chan PoolTask) AppOption {
 	return func(app *App) {
 		pool, err := NewPool(
-			app.log.With(logs.AppComponent("worker pool")),
 			subscriptions...,
 		)
 		if err != nil {
-			app.log.Warn("failed to init worker pool", logs.Error(err))
+			app.Log.Warn("failed to init worker pool", logs.Error(err))
 			return
 		}
 		app.AddServices(pool)

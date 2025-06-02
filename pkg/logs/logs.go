@@ -2,7 +2,6 @@ package logs
 
 import (
 	"io"
-	"log"
 	"log/slog"
 	"os"
 
@@ -19,12 +18,12 @@ const (
 )
 
 type EnvConfig struct {
-	Env string `env:"ENV" default:"dev" validate:"oneof=dev prod test" desc:"The environment in which the application is running"`
+	Env string `env:"ENV" default:"dev" desc:"The environment in which the application is running"`
 }
 
 type Config struct {
-	Env        string
-	Marshaller string
+	Env        string `validate:"oneof=dev prod test"`
+	Marshaller string `validate:"oneof=json yaml"`
 }
 
 func validateConfig(conf Config) error {
@@ -39,7 +38,7 @@ func validateConfig(conf Config) error {
 func SetupLogger() *slog.Logger {
 	var envConf EnvConfig
 	if err := config.ReadConfig(&envConf); err != nil {
-		log.Println(errors.Wrap(err, "setup logger: failed to read config"))
+		// log.Println(errors.Wrap(err, "setup logger: failed to read config"))
 	}
 
 	return SetupLoggerConf(Config{
@@ -50,7 +49,7 @@ func SetupLogger() *slog.Logger {
 func SetupLoggerConf(conf Config) *slog.Logger {
 
 	if err := validateConfig(conf); err != nil {
-		log.Println(err)
+		// log.Println(err)
 	}
 
 	switch conf.Env {
@@ -76,10 +75,10 @@ func SetupLoggerConf(conf Config) *slog.Logger {
 				AttrOperation: colors.Green,
 			}),
 		))
+	default:
+		return slog.New(slog.NewJSONHandler(
+			os.Stdout,
+			&slog.HandlerOptions{Level: slog.LevelDebug},
+		))
 	}
-
-	return slog.New(slog.NewJSONHandler(
-		os.Stdout,
-		&slog.HandlerOptions{Level: slog.LevelDebug},
-	))
 }

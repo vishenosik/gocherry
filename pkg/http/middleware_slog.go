@@ -10,51 +10,62 @@ import (
 	"github.com/vishenosik/gocherry/pkg/logs"
 )
 
-type loggingResponseWriter struct {
+type requestLogger struct {
 	http.ResponseWriter
 	statusCode int
+	log        *slog.Logger
 }
 
-func RequestLogger(logger *slog.Logger) func(next http.Handler) http.Handler {
+type RequestLoggerOption func(*requestLogger)
+
+func newRequestLogger() *requestLogger {
+	log := logs.SetupLogger().With(appComponent())
+	return &requestLogger{
+		log: log,
+	}
+}
+
+func (rl *requestLogger) WriteHeader(statusCode int) {
+	rl.statusCode = statusCode
+	rl.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (rl *requestLogger) setWriter(w http.ResponseWriter) {
+	rl.ResponseWriter = w
+	rl.statusCode = http.StatusOK
+}
+
+func RequestLogger(opts ...RequestLoggerOption) func(next http.Handler) http.Handler {
+
+	rl := newRequestLogger()
+
+	for _, opt := range opts {
+		opt(rl)
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			lrw := newLoggingResponseWriter(w)
+
+			rl.setWriter(w)
+
 			timeStart := time.Now()
 
-			next.ServeHTTP(lrw, r)
+			next.ServeHTTP(rl, r)
 
-			log := logger.With(
+			log := rl.log.With(
 				slog.String("method", fmt.Sprintf("%s %s", r.Method, r.URL.Path)),
-				slog.Int("code", lrw.statusCode),
+				slog.Int("code", rl.statusCode),
 				logs.Took(timeStart),
 			)
 
 			switch {
-			case api.IsClientError(lrw.statusCode) || api.IsServerError(lrw.statusCode):
+			case api.IsClientError(rl.statusCode) || api.IsServerError(rl.statusCode):
 				log.Error("request failed with error")
-			case api.IsRedirect(lrw.statusCode):
+			case api.IsRedirect(rl.statusCode):
 				log.Warn("request redirected")
 			default:
 				log.Info("request accepted")
 			}
-		})
-	}
-}
-
-func newLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
-	return &loggingResponseWriter{w, http.StatusOK}
-}
-
-func (lrw *loggingResponseWriter) WriteHeader(statusCode int) {
-	lrw.statusCode = statusCode
-	lrw.ResponseWriter.WriteHeader(statusCode)
-}
-
-func SetHeaders() func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			next.ServeHTTP(w, r)
 		})
 	}
 }

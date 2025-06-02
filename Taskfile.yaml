@@ -1,0 +1,8 @@
+version: "3"
+
+# dotenv: ['.env']
+
+tasks:
+  test:
+    desc: "Test all packages"
+    cmd: go test -v -cover ./...

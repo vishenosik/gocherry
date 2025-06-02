@@ -28,16 +28,10 @@ func ConfigInfo(writer io.Writer, structs ...any) func(string) error {
 
 func ConfigDoc(structs ...any) func(string) error {
 	return func(filename string) error {
-
-		if _, err := os.Stat(filename); err != nil {
-			return err
-		}
-
 		file, err := os.Create(filename)
 		if err != nil {
 			return err
 		}
-
 		return ConfigInfo(file, structs...)(filename)
 	}
 }
@@ -89,8 +83,8 @@ func genEnvConfig(cfg any) []byte {
 
 	builder := new(strings.Builder)
 
-	writer := newIndent(builder, 2)
-	genEnvConfigRecursively(writer, _type)
+	writer := newIndent(builder, 0)
+	genEnvConfigRecursively(builder, _type)
 
 	return writer.Bytes()
 }
