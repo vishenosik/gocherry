@@ -21,14 +21,16 @@ type Pool struct {
 	subChan <-chan PoolTask
 }
 
-func NewPool(log *slog.Logger, subscriptions ...chan PoolTask) (*Pool, error) {
-	return NewPoolContext(context.Background(), log, subscriptions...)
+func NewPool(subscriptions ...chan PoolTask) (*Pool, error) {
+	return NewPoolContext(context.Background(), subscriptions...)
 }
 
-func NewPoolContext(ctx context.Context, log *slog.Logger, subscriptions ...chan PoolTask) (*Pool, error) {
+func NewPoolContext(ctx context.Context, subscriptions ...chan PoolTask) (*Pool, error) {
 	if len(subscriptions) == 0 {
 		return nil, errors.New("no subscriptions provided")
 	}
+
+	log := logs.SetupLogger().With(logs.AppComponent("worker pool"))
 
 	pool := &Pool{
 		log:     log,

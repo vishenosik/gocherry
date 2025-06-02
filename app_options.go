@@ -13,17 +13,23 @@ func WithHttpRoutes(handler http.Handler) AppOption {
 			app.Log.Warn("failed to add http service: handler is nil")
 			return
 		}
-		app.AddServices(_http.NewHttpServer(
-			app.Log.With(logs.AppComponent("http")),
+
+		server, err := _http.NewHttpServer(
 			handler,
-		))
+		)
+
+		if err != nil {
+			app.Log.Warn("failed to add http service", logs.Error(err))
+			return
+		}
+
+		app.AddServices(server)
 	}
 }
 
 func WithWorkerPool(subscriptions ...chan PoolTask) AppOption {
 	return func(app *App) {
 		pool, err := NewPool(
-			app.Log.With(logs.AppComponent("worker pool")),
 			subscriptions...,
 		)
 		if err != nil {

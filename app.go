@@ -6,21 +6,28 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/vishenosik/gocherry/pkg/cache"
 	"github.com/vishenosik/gocherry/pkg/config"
 	"github.com/vishenosik/gocherry/pkg/http"
 	"github.com/vishenosik/gocherry/pkg/logs"
+	"github.com/vishenosik/gocherry/pkg/sql"
 
 	webctx "github.com/vishenosik/web/context"
 )
 
-type App struct {
-	Log      *slog.Logger
-	services []Service
-}
-
 type Service interface {
 	Start(ctx context.Context) error
 	Stop(ctx context.Context) error
+}
+
+type Closer interface {
+	Close(ctx context.Context) error
+}
+
+type App struct {
+	Log      *slog.Logger
+	services []Service
+	closers  []Closer
 }
 
 type AppOption = func(*App)
@@ -40,6 +47,26 @@ func NewApp(opts ...AppOption) (*App, error) {
 	return app, nil
 }
 
+func (app *App) AddServices(services ...any) {
+
+	if len(app.services) == 0 {
+		app.services = make([]Service, 0, len(services))
+	}
+
+	if len(app.closers) == 0 {
+		app.closers = make([]Closer, 0, len(services))
+	}
+
+	for _, service := range services {
+		switch srv := service.(type) {
+		case Service:
+			app.services = append(app.services, srv)
+		case Closer:
+			app.closers = append(app.closers, srv)
+		}
+	}
+}
+
 func (app *App) Start(ctx context.Context) error {
 
 	app.Log.Info("start app")
@@ -48,13 +75,6 @@ func (app *App) Start(ctx context.Context) error {
 		go service.Start(ctx)
 	}
 	return nil
-}
-
-func (app *App) AddServices(services ...Service) {
-	if len(app.services) == 0 {
-		app.services = make([]Service, 0, len(services))
-	}
-	app.services = append(app.services, services...)
 }
 
 func (app *App) Stop(ctx context.Context) error {
@@ -72,16 +92,22 @@ func (app *App) Stop(ctx context.Context) error {
 		service.Stop(ctx)
 	}
 
+	for _, closer := range app.closers {
+		closer.Close(ctx)
+	}
+
 	app.Log.Info("app stopped")
 	return nil
 }
 
-func Flags() {
+func ConfigFlags(structs ...any) {
 
-	structs := []any{
+	structs = append(structs, []any{
 		logs.EnvConfig{},
-		http.EnvConfig{},
-	}
+		http.ConfigEnv{},
+		cache.RedisConfigEnv{},
+		sql.SqliteConfigEnv{},
+	}...)
 
 	flag.BoolFunc(
 		"config.info",

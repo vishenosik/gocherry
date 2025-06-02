@@ -2,84 +2,84 @@ package http
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
 	"github.com/vishenosik/gocherry/pkg/config"
 	"github.com/vishenosik/gocherry/pkg/logs"
 )
 
+func appComponent() slog.Attr {
+	return logs.AppComponent("http")
+}
+
 type Server struct {
 	log    *slog.Logger
 	server *http.Server
-	port   uint16
+	config Config
 }
 
-type EnvConfig struct {
-	Port uint16 `env:"REST_PORT" default:"8080" desc:"REST server port"`
+type ConfigEnv struct {
+	Port    uint16        `env:"HTTP_PORT" default:"8080" desc:"HTTP server port"`
+	Timeout time.Duration `env:"HTTP_TIMEOUT" default:"15s" desc:"HTTP timeout"`
 }
 
 type Config struct {
-	Port    uint16 `validate:"gte=1,lte=65535"`
-	Timeout time.Duration
+	Server config.Server
 }
 
-func validateConfig(conf Config) error {
-	const op = "validateConfig"
-	valid := validator.New()
-	if err := valid.Struct(conf); err != nil {
-		return errors.Wrap(err, op)
-	}
-	return nil
-}
+type ServerOption func(*Server)
 
-func NewHttpServer(logger *slog.Logger, handler http.Handler) *Server {
-	var envConf EnvConfig
+func NewHttpServer(
+	handler http.Handler,
+	opts ...ServerOption,
+) (*Server, error) {
+
+	log := logs.SetupLogger().With(logs.AppComponent("http"))
+
+	var envConf ConfigEnv
 	if err := config.ReadConfig(&envConf); err != nil {
-		log.Println(errors.Wrap(err, "init http app: failed to read config"))
+		log.Warn("init http server: failed to read config", logs.Error(err))
 	}
 
 	config := Config{
-		Port: envConf.Port,
+		Server: config.Server{
+			Port:    envConf.Port,
+			Timeout: envConf.Timeout,
+		},
 	}
 
-	return NewHttpAppConfig(config, logger, handler)
-}
+	srv := &Server{
+		log: log,
+		server: &http.Server{
+			Addr:    config.Server.String(),
+			Handler: handler,
+		},
+		config: config,
+	}
 
-func NewHttpAppConfig(config Config, logger *slog.Logger, handler http.Handler) *Server {
+	for _, opt := range opts {
+		opt(srv)
+	}
 
 	if err := validateConfig(config); err != nil {
 		panic(errors.Wrap(err, "failed to validate http app config"))
 	}
 
-	if logger == nil {
-		panic("logger can't be nil")
-	}
-
 	if handler == nil {
-		panic("handler can't be nil")
+		return nil, errors.New("handler can't be nil")
 	}
 
-	return &Server{
-		log: logger,
-		server: &http.Server{
-			Addr:    fmt.Sprintf(":%d", config.Port),
-			Handler: handler,
-		},
-		port: config.Port,
-	}
+	return srv, nil
 }
 
 func (a *Server) Start(_ context.Context) error {
 	const op = "http.Server.Run"
 
-	log := a.log.With(logs.Operation(op), slog.Any("port", a.port))
+	log := a.log.With(logs.Operation(op), slog.Any("port", a.config.Server.Port))
 
 	log.Info("starting server")
 
@@ -96,10 +96,18 @@ func (a *Server) Stop(ctx context.Context) error {
 
 	const op = "http.Server.Stop"
 
-	a.log.Info("stopping server", logs.Operation(op), slog.Any("port", a.port))
+	a.log.Info("stopping server", logs.Operation(op), slog.Any("port", a.config.Server.Port))
 
 	if err := a.server.Shutdown(ctx); err != nil {
 		a.log.Error("server shutdown failed", logs.Error(err))
+	}
+	return nil
+}
+
+func validateConfig(config Config) error {
+	const op = "validateConfig"
+	if err := config.Server.Validate(); err != nil {
+		return errors.Wrap(err, op)
 	}
 	return nil
 }

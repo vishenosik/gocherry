@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-	"log"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -44,10 +43,8 @@ func validateSqliteConfig(conf SqliteConfig) error {
 func NewSqliteStore(opts ...SqliteStoreOption) (*SqliteStore, error) {
 	var envConf SqliteConfigEnv
 	if err := config.ReadConfig(&envConf); err != nil {
-		log.Println(errors.Wrap(err, "setup logger: failed to read config"))
+		return nil, errors.Wrap(err, "setup logger: failed to read config")
 	}
-
-	fmt.Println("envConf", envConf)
 
 	return NewSqliteStoreConfig(SqliteConfig{
 		StorePath: envConf.StorePath,

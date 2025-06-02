@@ -28,16 +28,10 @@ func ConfigInfo(writer io.Writer, structs ...any) func(string) error {
 
 func ConfigDoc(structs ...any) func(string) error {
 	return func(filename string) error {
-
-		if _, err := os.Stat(filename); err != nil {
-			return err
-		}
-
 		file, err := os.Create(filename)
 		if err != nil {
 			return err
 		}
-
 		return ConfigInfo(file, structs...)(filename)
 	}
 }
