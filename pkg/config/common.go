@@ -22,9 +22,6 @@ func (srv Server) Validate() error {
 }
 
 func (srv Server) String() string {
-	if srv.Host == "" {
-		srv.Host = "localhost"
-	}
 	return fmt.Sprintf("%s:%d", srv.Host, srv.Port)
 }
 

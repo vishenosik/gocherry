@@ -38,7 +38,11 @@ func NewHttpServer(
 	opts ...ServerOption,
 ) (*Server, error) {
 
-	log := logs.SetupLogger().With(logs.AppComponent("http"))
+	if handler == nil {
+		return nil, errors.New("handler can't be nil")
+	}
+
+	log := logs.SetupLogger().With(appComponent())
 
 	var envConf ConfigEnv
 	if err := config.ReadConfig(&envConf); err != nil {
@@ -66,18 +70,14 @@ func NewHttpServer(
 	}
 
 	if err := validateConfig(config); err != nil {
-		panic(errors.Wrap(err, "failed to validate http app config"))
-	}
-
-	if handler == nil {
-		return nil, errors.New("handler can't be nil")
+		return nil, errors.Wrap(err, "failed to validate http app config")
 	}
 
 	return srv, nil
 }
 
 func (a *Server) Start(_ context.Context) error {
-	const op = "http.Server.Run"
+	const op = "http.Server.Start"
 
 	log := a.log.With(logs.Operation(op), slog.Any("port", a.config.Server.Port))
 

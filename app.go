@@ -8,6 +8,7 @@ import (
 
 	"github.com/vishenosik/gocherry/pkg/cache"
 	"github.com/vishenosik/gocherry/pkg/config"
+	"github.com/vishenosik/gocherry/pkg/grpc"
 	"github.com/vishenosik/gocherry/pkg/http"
 	"github.com/vishenosik/gocherry/pkg/logs"
 	"github.com/vishenosik/gocherry/pkg/sql"
@@ -107,6 +108,7 @@ func ConfigFlags(structs ...any) {
 		http.ConfigEnv{},
 		cache.RedisConfigEnv{},
 		sql.SqliteConfigEnv{},
+		grpc.ConfigEnv{},
 	}...)
 
 	flag.BoolFunc(
