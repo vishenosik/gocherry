@@ -13,7 +13,7 @@ import (
 	"github.com/vishenosik/gocherry/pkg/logs"
 	"github.com/vishenosik/gocherry/pkg/sql"
 
-	webctx "github.com/vishenosik/web/context"
+	_ctx "github.com/vishenosik/gocherry/pkg/context"
 )
 
 type Service interface {
@@ -82,7 +82,7 @@ func (app *App) Stop(ctx context.Context) error {
 
 	const msg = "app stopping"
 
-	signal, ok := webctx.StopFromCtx(ctx)
+	signal, ok := _ctx.StopFromCtx(ctx)
 	if ok {
 		app.Log.Info(msg, slog.String("signal", signal.Signal.String()))
 	} else {

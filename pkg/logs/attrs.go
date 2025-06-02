@@ -6,7 +6,7 @@ import (
 	"time"
 
 	// internal
-	time_helper "github.com/vishenosik/web/time"
+	time_helper "github.com/vishenosik/gocherry/pkg/time"
 )
 
 const (

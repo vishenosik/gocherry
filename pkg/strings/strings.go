@@ -3,7 +3,7 @@ package strings
 import (
 	"strings"
 
-	"github.com/vishenosik/web/collections"
+	"github.com/vishenosik/gocherry/pkg/collections"
 )
 
 func ReplaceAllStringFunc(src string, replacements []string, replaceFunc func(string) string) string {

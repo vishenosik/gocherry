@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
+	"github.com/vishenosik/gocherry/pkg/colors"
 	"github.com/vishenosik/gocherry/pkg/config"
-	"github.com/vishenosik/web/colors"
 )
 
 const (
