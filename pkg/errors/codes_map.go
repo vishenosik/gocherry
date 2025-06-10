@@ -6,22 +6,22 @@ import (
 )
 
 type ErrorsMap[Type any] struct {
-	data map[error]Type
-	def  Type
+	_map_     map[error]Type
+	_default_ Type
 }
 
-func NewErrorsMap[Type any](Initial map[error]Type, Default Type) *ErrorsMap[Type] {
+func NewErrorsMap[Type any](_default_ Type, _map_ map[error]Type) *ErrorsMap[Type] {
 	return &ErrorsMap[Type]{
-		data: Initial,
-		def:  Default,
+		_default_: _default_,
+		_map_:     _map_,
 	}
 }
 
 func (em *ErrorsMap[Type]) Get(err error) Type {
-	for er := range em.data {
+	for er := range em._map_ {
 		if errors.Is(err, er) {
-			return em.data[er]
+			return em._map_[er]
 		}
 	}
-	return em.def
+	return em._default_
 }

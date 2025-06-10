@@ -24,5 +24,6 @@ func NewErrorResponse(statusCode int, critical string, errors ...string) ErrorRe
 func SendErrors(w http.ResponseWriter, statusCode int, critical string, errors ...string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	_ = json.NewEncoder(w).Encode(NewErrorResponse(statusCode, critical, errors...))
+	resp, _ := json.Marshal(NewErrorResponse(statusCode, critical, errors...))
+	w.Write(resp)
 }
