@@ -1,4 +1,4 @@
-package operation
+package errors
 
 import (
 	"github.com/pkg/errors"
