@@ -1,10 +1,5 @@
 package errors
 
-import (
-	// pkg
-	"github.com/pkg/errors"
-)
-
 type ErrorsMap[Type any] struct {
 	_map_     map[error]Type
 	_default_ Type
@@ -19,7 +14,7 @@ func NewErrorsMap[Type any](_default_ Type, _map_ map[error]Type) *ErrorsMap[Typ
 
 func (em *ErrorsMap[Type]) Get(err error) Type {
 	for er := range em._map_ {
-		if errors.Is(err, er) {
+		if Is(err, er) {
 			return em._map_[er]
 		}
 	}

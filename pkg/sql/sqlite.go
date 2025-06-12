@@ -72,24 +72,26 @@ func (ss *SqliteStore) Close(_ context.Context) error {
 	return ss.db.Close()
 }
 
-func (s *SqliteStore) Open(_ context.Context) (*sqlx.DB, error) {
-	db, err := sqlx.Open("sqlite3", s.storePath)
+func (ss *SqliteStore) Open(_ context.Context) (*sqlx.DB, error) {
+	db, err := sqlx.Open("sqlite3", ss.storePath)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to sqlite")
 	}
 
-	if s.migrationsFS == nil {
+	ss.db = db
+
+	if ss.migrationsFS == nil {
 		return db, nil
 	}
 
 	goose.SetLogger(goose.NopLogger())
-	goose.SetBaseFS(s.migrationsFS)
+	goose.SetBaseFS(ss.migrationsFS)
 
 	if err := goose.SetDialect("sqlite"); err != nil {
 		return nil, fmt.Errorf("failed to set sqlite: %w", err)
 	}
 
-	if err := goose.Up(db.DB, s.migrationsPath); err != nil {
+	if err := goose.Up(db.DB, ss.migrationsPath); err != nil {
 		return nil, errors.Wrap(err, "failed to run migrations up")
 	}
 	return db, nil

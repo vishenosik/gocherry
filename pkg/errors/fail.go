@@ -47,7 +47,3 @@ func FailWrapErrorStatus[Type any](result Type, message string) func(code codes.
 		return result, status.Error(code, message)
 	}
 }
-
-func FailNilWrapErrorStatus(message string) func(code codes.Code) (any, error) {
-	return FailWrapErrorStatus[any](nil, message)
-}
