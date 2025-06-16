@@ -40,8 +40,10 @@ type GrpcService interface {
 	RegisterService(server *grpc.Server)
 }
 
+type GrpcServices = []GrpcService
+
 func NewGrpcServer(
-	services []GrpcService,
+	services GrpcServices,
 	opts ...ServerOption,
 ) (*Server, error) {
 

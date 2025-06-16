@@ -1,4 +1,4 @@
-package operation
+package errors
 
 import (
 	"github.com/pkg/errors"
@@ -46,8 +46,4 @@ func FailWrapErrorStatus[Type any](result Type, message string) func(code codes.
 	return func(code codes.Code) (Type, error) {
 		return result, status.Error(code, message)
 	}
-}
-
-func FailNilWrapErrorStatus(message string) func(code codes.Code) (any, error) {
-	return FailWrapErrorStatus[any](nil, message)
 }
