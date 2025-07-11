@@ -9,6 +9,10 @@ import (
 	"github.com/vishenosik/gocherry/pkg/config"
 )
 
+func init() {
+	config.AddStructs(RedisConfigEnv{})
+}
+
 type RedisConfigEnv struct {
 	Host     string        `env:"REDIS_HOST" default:"localhost" desc:"Redis server host"`
 	Port     uint16        `env:"REDIS_PORT" default:"6380" desc:"Redis server port"`
@@ -16,6 +20,10 @@ type RedisConfigEnv struct {
 	User     string        `env:"REDIS_USER" default:"user" desc:"Redis user"`
 	Password string        `env:"REDIS_USER_PASSWORD" default:"password" desc:"Redis user's password"`
 	DB       int           `env:"REDIS_DB" default:"0" desc:"Redis database connection"`
+}
+
+func (RedisConfigEnv) Desc() string {
+	return "Redis connection settings"
 }
 
 type RedisConfig struct {

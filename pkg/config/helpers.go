@@ -9,30 +9,61 @@ import (
 	"strings"
 )
 
+var (
+	_structs []any
+)
+
+func AddStructs(structs ...any) {
+	if len(_structs) == 0 {
+		_structs = make([]any, 0, len(structs))
+	}
+	_structs = append(_structs, structs...)
+}
+
+func Structs() []any {
+	return _structs
+}
+
 const (
 	whiteSpace = 32
 )
 
-func ConfigInfo(writer io.Writer, structs ...any) func(string) error {
+type Header interface {
+	Desc() string
+}
+
+func ConfigInfoEnv(writer io.Writer, structs ...any) func(string) error {
 	return func(string) error {
 		defer os.Exit(0)
 
 		for _, _struct := range structs {
-			if _, err := writer.Write(genEnvConfig(_struct)); err != nil {
-				return err
+
+			if header, ok := _struct.(Header); ok {
+				writeHeader(writer, header.Desc())
+			} else {
+				writeHeader(writer, reflect.TypeOf(_struct).String())
 			}
+
+			writer.Write(genEnvConfig(_struct))
 		}
 		return nil
 	}
 }
 
-func ConfigDoc(structs ...any) func(string) error {
+func writeHeader(writer io.Writer, header string) {
+	writer.Write(fmt.Appendf([]byte{}, "\n#=== %s ===#\n\n", header))
+}
+
+func ConfigGenEnv(structs ...any) func(string) error {
 	return func(filename string) error {
+		if filename == "" {
+			filename = "example.env"
+		}
 		file, err := os.Create(filename)
 		if err != nil {
 			return err
 		}
-		return ConfigInfo(file, structs...)(filename)
+		return ConfigInfoEnv(file, structs...)(filename)
 	}
 }
 

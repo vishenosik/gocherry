@@ -14,12 +14,20 @@ import (
 	"github.com/vishenosik/gocherry/pkg/config"
 )
 
+func init() {
+	config.AddStructs(SqliteConfigEnv{})
+}
+
 type SqliteConfig struct {
 	StorePath string `validate:"required"`
 }
 
 type SqliteConfigEnv struct {
 	StorePath string `env:"SQLITE_STORE_PATH" default:"./storage/store.db" desc:"A path to sqlite store file"`
+}
+
+func (SqliteConfigEnv) Desc() string {
+	return "SQLite connection settings"
 }
 
 type SqliteStore struct {

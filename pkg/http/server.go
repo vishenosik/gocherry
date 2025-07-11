@@ -22,9 +22,17 @@ type Server struct {
 	config Config
 }
 
+func init() {
+	config.AddStructs(ConfigEnv{})
+}
+
 type ConfigEnv struct {
 	Port    uint16        `env:"HTTP_PORT" default:"8080" desc:"HTTP server port"`
 	Timeout time.Duration `env:"HTTP_TIMEOUT" default:"15s" desc:"HTTP timeout"`
+}
+
+func (ConfigEnv) Desc() string {
+	return "http server settings"
 }
 
 type Config struct {

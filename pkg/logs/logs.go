@@ -17,6 +17,10 @@ const (
 	EnvTest = "test"
 )
 
+func init() {
+	config.AddStructs(EnvConfig{})
+}
+
 type EnvConfig struct {
 	Env string `env:"ENV" default:"dev" desc:"The environment in which the application is running"`
 }

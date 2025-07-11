@@ -6,14 +6,18 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/vishenosik/gocherry/pkg/cache"
 	"github.com/vishenosik/gocherry/pkg/config"
-	"github.com/vishenosik/gocherry/pkg/grpc"
-	"github.com/vishenosik/gocherry/pkg/http"
 	"github.com/vishenosik/gocherry/pkg/logs"
-	"github.com/vishenosik/gocherry/pkg/sql"
 
 	_ctx "github.com/vishenosik/gocherry/pkg/context"
+)
+
+var (
+	BuildDate string
+	GitBranch string
+	GitCommit string
+	GoVersion string
+	GitTag    string
 )
 
 type Service interface {
@@ -103,24 +107,18 @@ func (app *App) Stop(ctx context.Context) error {
 
 func ConfigFlags(structs ...any) {
 
-	structs = append(structs, []any{
-		logs.EnvConfig{},
-		http.ConfigEnv{},
-		cache.RedisConfigEnv{},
-		sql.SqliteConfigEnv{},
-		grpc.ConfigEnv{},
-	}...)
+	_structs := append(structs, config.Structs()...)
 
 	flag.BoolFunc(
 		"config.info",
 		"Show config schema information",
-		config.ConfigInfo(os.Stdout, structs...),
+		config.ConfigInfoEnv(os.Stdout, _structs...),
 	)
 
 	flag.Func(
-		"config.doc",
-		"Update config example in docs",
-		config.ConfigDoc(structs...),
+		"config.gen",
+		"Generate config schema",
+		config.ConfigGenEnv(_structs...),
 	)
 
 }
