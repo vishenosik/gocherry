@@ -12,14 +12,6 @@ import (
 	_ctx "github.com/vishenosik/gocherry/pkg/context"
 )
 
-var (
-	BuildDate string
-	GitBranch string
-	GitCommit string
-	GoVersion string
-	GitTag    string
-)
-
 type Service interface {
 	Start(ctx context.Context) error
 	Stop(ctx context.Context) error
