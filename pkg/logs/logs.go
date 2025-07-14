@@ -56,33 +56,41 @@ func SetupLoggerConf(conf Config) *slog.Logger {
 		// log.Println(err)
 	}
 
+	var handler slog.Handler
+
 	switch conf.Env {
 
 	case EnvProd:
-		return slog.New(slog.NewJSONHandler(
+		handler = slog.NewJSONHandler(
 			os.Stdout,
 			&slog.HandlerOptions{Level: slog.LevelInfo},
-		))
+		)
 
 	case EnvTest:
-		return slog.New(slog.NewJSONHandler(
+		handler = slog.NewJSONHandler(
 			io.Discard,
 			&slog.HandlerOptions{Level: slog.LevelInfo},
-		))
+		)
 
 	case EnvDev:
-		return slog.New(NewHandler(
+		handler = NewHandler(
 			WithYamlMarshaller(),
 			WithNumbersHighlight(colors.Blue),
 			WithKeyWordsHighlight(map[string]colors.ColorCode{
 				AttrError:     colors.Red,
 				AttrOperation: colors.Green,
 			}),
-		))
+		)
+
 	default:
-		return slog.New(slog.NewJSONHandler(
+		handler = slog.NewJSONHandler(
 			os.Stdout,
 			&slog.HandlerOptions{Level: slog.LevelDebug},
-		))
+		)
 	}
+
+	logger := slog.New(handler)
+	redirectStdLogger(logger)
+
+	return logger
 }

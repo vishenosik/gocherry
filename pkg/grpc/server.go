@@ -96,18 +96,18 @@ func (a *Server) Start(_ context.Context) error {
 	const op = "grpc.Server.Start"
 
 	log := a.log.With(
-		slog.String("op", op),
+		logs.Operation(op),
 		slog.Any("port", a.config.Server.Port),
 	)
 
-	log.Info("starting gRPC server")
+	log.Info("starting server")
 
 	listener, err := net.Listen("tcp", a.config.Server.String())
 	if err != nil {
 		return errors.Wrap(err, op)
 	}
 
-	log.Info("gRPC server is running", slog.String("addr", listener.Addr().String()))
+	log.Info("server is running", slog.String("addr", listener.Addr().String()))
 
 	if err := a.server.Serve(listener); err != nil {
 		return errors.Wrap(err, op)
@@ -120,8 +120,8 @@ func (a *Server) Stop(ctx context.Context) error {
 
 	const op = "grpc.Server.Stop"
 
-	a.log.With(slog.String("op", op)).
-		Info("stopping gRPC server", slog.Any("port", a.config.Server.Port))
+	a.log.With(logs.Operation(op)).
+		Info("stopping server", slog.Any("port", a.config.Server.Port))
 
 	a.server.GracefulStop()
 	return nil
