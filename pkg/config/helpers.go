@@ -131,12 +131,12 @@ func genEnvConfigRecursively(writer io.Writer, _type reflect.Type) {
 			continue
 		}
 
-		writer.Write([]byte("# "))
 		descTag, ok := field.Tag.Lookup("desc")
-		if ok {
-			writer.Write([]byte(descTag))
+		if !ok || descTag == "-" {
+			continue
 		}
-		writer.Write([]byte(fmt.Sprintf(" (%s)\n", field.Type)))
+
+		writer.Write(fmt.Appendf([]byte{}, "# %s (%s)\n", descTag, field.Type))
 
 		if envTag, ok := field.Tag.Lookup("env"); ok {
 			writer.Write([]byte(envTag + "="))
