@@ -37,14 +37,14 @@ func (rl *requestLogger) setWriter(w http.ResponseWriter) {
 
 func RequestLogger(opts ...RequestLoggerOption) func(next http.Handler) http.Handler {
 
-	rl := newRequestLogger()
-
-	for _, opt := range opts {
-		opt(rl)
-	}
-
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			rl := newRequestLogger()
+
+			for _, opt := range opts {
+				opt(rl)
+			}
 
 			rl.setWriter(w)
 
