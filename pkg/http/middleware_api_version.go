@@ -153,7 +153,7 @@ func ApiVersionMiddleware(
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if err := av.ParseRequest(r); err != nil {
-				SendErrors(w, http.StatusBadRequest, fmt.Sprintf("API version error: %s", err))
+				SendErrors(w, http.StatusBadRequest, errors.Wrap(err, "API version error"))
 				return
 			}
 			ctx := context.WithValue(r.Context(), apiVersionKey{}, av.Version)
@@ -170,13 +170,13 @@ func DotVersionHandler(handlers HandlersMap) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		apiVersion, err := TypedApiVersionFromContext[versions.DotVersion](r.Context())
 		if err != nil {
-			SendErrors(w, http.StatusBadRequest, err.Error())
+			SendErrors(w, http.StatusBadRequest, err)
 			return
 		}
 
 		handler, ok := handlers[apiVersion.String()]
 		if !ok || handler == nil {
-			SendErrors(w, http.StatusNotImplemented, "api version unsupported")
+			SendErrors(w, http.StatusNotImplemented, errors.New("api version unsupported"))
 			return
 		}
 
@@ -188,13 +188,13 @@ func ApiVersionHandler(handlers HandlersMap) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		apiVersion, err := ApiVersionFromContext(r.Context())
 		if err != nil {
-			SendErrors(w, http.StatusBadRequest, err.Error())
+			SendErrors(w, http.StatusBadRequest, err)
 			return
 		}
 
 		handler, ok := handlers[apiVersion.String()]
 		if !ok || handler == nil {
-			SendErrors(w, http.StatusNotImplemented, "api version unsupported")
+			SendErrors(w, http.StatusNotImplemented, errors.New("api version unsupported"))
 			return
 		}
 

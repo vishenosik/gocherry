@@ -10,35 +10,33 @@ type MultiError struct {
 	errs     *multierror.Error
 }
 
-type Error = MultiError
-
-func (er *Error) ErrorOrNil() error {
+func (er *MultiError) ErrorOrNil() error {
 	if er.errs == nil || len(er.errs.Errors) == 0 {
 		return nil
 	}
 	return er
 }
 
-func (er *Error) Error() string {
+func (er *MultiError) Error() string {
 	return er.errs.Error()
 }
 
-func (er *Error) Unwrap() error {
+func (er *MultiError) Unwrap() error {
 	return er.errs.Unwrap()
 }
 
-func (er *Error) Critical() error {
+func (er *MultiError) Critical() error {
 	return er.critical
 }
 
-func (er *Error) CriticalString() string {
+func (er *MultiError) CriticalString() string {
 	if er.critical != nil {
 		return er.critical.Error()
 	}
 	return ""
 }
 
-func (er *Error) List() []string {
+func (er *MultiError) List() []string {
 	if er.errs == nil {
 		return nil
 	}
@@ -51,7 +49,7 @@ func (er *Error) List() []string {
 	return errors
 }
 
-func (er *Error) append(err error, critical bool, wrapper func(error) error) {
+func (er *MultiError) append(err error, critical bool, wrapper func(error) error) {
 	if err == nil {
 		return
 	}
@@ -65,7 +63,7 @@ func (er *Error) append(err error, critical bool, wrapper func(error) error) {
 		for _, _err := range err.Errors {
 			er.errs = multierror.Append(er.errs, wrapper(_err))
 		}
-	case *Error:
+	case *MultiError:
 		er.critical = err.critical
 		er.errs = multierror.Append(er.errs, wrapper(err.errs))
 	default:
@@ -73,26 +71,26 @@ func (er *Error) append(err error, critical bool, wrapper func(error) error) {
 	}
 }
 
-func (er *Error) Append(err error) {
+func (er *MultiError) Append(err error) {
 	er.append(err, false, func(err error) error { return err })
 }
 
-func (er *Error) AppendWrap(err error, message string) {
+func (er *MultiError) AppendWrap(err error, message string) {
 	er.append(err, false, func(err error) error { return errors.Wrap(err, message) })
 }
 
-func (er *Error) AppendWrapf(err error, format string, args ...any) {
+func (er *MultiError) AppendWrapf(err error, format string, args ...any) {
 	er.append(err, false, func(err error) error { return errors.Wrapf(err, format, args...) })
 }
 
-func (er *Error) AppendCritical(err error) {
+func (er *MultiError) AppendCritical(err error) {
 	er.append(err, true, func(err error) error { return err })
 }
 
-func (er *Error) AppendCriticalWrap(err error, message string) {
+func (er *MultiError) AppendCriticalWrap(err error, message string) {
 	er.append(err, true, func(err error) error { return errors.Wrap(err, message) })
 }
 
-func (er *Error) AppendCriticalWrapf(err error, format string, args ...any) {
+func (er *MultiError) AppendCriticalWrapf(err error, format string, args ...any) {
 	er.append(err, true, func(err error) error { return errors.Wrapf(err, format, args...) })
 }
