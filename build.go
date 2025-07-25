@@ -12,15 +12,17 @@ import (
 const (
 	_yaml_ = iota
 	_json_
+
+	unset = "not configured"
 )
 
 // Build flags variables
 var (
-	BuildDate string
-	GitBranch string
-	GitCommit string
-	GoVersion string
-	GitTag    string
+	BuildDate string = unset
+	GitBranch string = unset
+	GitCommit string = unset
+	GoVersion string = unset
+	GitTag    string = unset
 )
 
 type BuildInfo struct {

@@ -3,9 +3,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"reflect"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/vishenosik/gocherry/pkg/errors"
@@ -62,7 +60,6 @@ func (h *httpError) MarshalJSON() ([]byte, error) {
 		})
 
 	default:
-		log.Println("default", reflect.TypeOf(h._error).Elem().String())
 		return json.Marshal(ErrorResponse{
 			Message: h.message,
 			Errors:  []string{err.Error()},
@@ -87,8 +84,12 @@ func (h HandlerWithError) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case *httpError:
 			SendErrors(w, e.statusCode, err)
 			return
+		default:
+			er := NewError(http.StatusInternalServerError, err)
+			SendErrors(w, http.StatusInternalServerError, er)
+			return
 		}
 
-		SendErrors(w, http.StatusInternalServerError, err)
+		// SendErrors(w, http.StatusInternalServerError, err)
 	}
 }

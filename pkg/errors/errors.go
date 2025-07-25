@@ -14,6 +14,10 @@ func Wrapf(err error, format string, args ...any) error {
 	return errors.Wrapf(err, format, args...)
 }
 
+func Unwrap(err error) error {
+	return errors.Unwrap(err)
+}
+
 func Is(err, target error) bool {
 	return errors.Is(err, target)
 }
