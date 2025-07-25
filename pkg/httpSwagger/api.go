@@ -16,11 +16,11 @@ func init() {
 
 type ConfigEnv struct {
 	// HTTP server port
-	Port uint16 `env:"HTTP_PORT" default:"8080" desc:"-"`
+	Port uint16 `env:"HTTP_PORT" env-default:"8080" desc:"-"`
 	// HTTP host
-	Host string `env:"SWAGGER_HTTP_HOST" default:"localhost:8080" desc:"HTTP host"`
+	Host string `env:"SWAGGER_HTTP_HOST" env-default:"localhost:8080" desc:"HTTP host"`
 	// Enable swagger
-	Enable bool `env:"SWAGGER_ENABLE" default:"false" desc:"Enable swagger"`
+	Enable bool `env:"SWAGGER_ENABLE" env-default:"false" desc:"Enable swagger"`
 }
 
 func (ConfigEnv) Desc() string {

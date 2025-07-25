@@ -27,8 +27,8 @@ func init() {
 }
 
 type ConfigEnv struct {
-	Port    uint16        `env:"HTTP_PORT" default:"8080" desc:"HTTP server port"`
-	Timeout time.Duration `env:"HTTP_TIMEOUT" default:"15s" desc:"HTTP timeout"`
+	Port    uint16        `env:"HTTP_PORT" env-default:"8080" desc:"HTTP server port"`
+	Timeout time.Duration `env:"HTTP_TIMEOUT" env-default:"15s" desc:"HTTP timeout"`
 }
 
 func (ConfigEnv) Desc() string {

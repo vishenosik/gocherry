@@ -30,8 +30,8 @@ func init() {
 }
 
 type ConfigEnv struct {
-	Port    uint16        `env:"GRPC_PORT" default:"9090" desc:"grpc server port"`
-	Timeout time.Duration `env:"GRPC_TIMEOUT" default:"15s" desc:"grpc timeout"`
+	Port    uint16        `env:"GRPC_PORT" env-default:"9090" desc:"grpc server port"`
+	Timeout time.Duration `env:"GRPC_TIMEOUT" env-default:"15s" desc:"grpc timeout"`
 }
 
 func (ConfigEnv) Desc() string {

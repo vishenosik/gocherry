@@ -31,5 +31,8 @@ type Credentials struct {
 }
 
 func ReadConfig(conf any) error {
-	return cleanenv.ReadConfig(".env", conf)
+	if err := cleanenv.ReadConfig(".env", conf); err != nil {
+		return cleanenv.ReadEnv(conf)
+	}
+	return nil
 }

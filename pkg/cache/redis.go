@@ -14,12 +14,12 @@ func init() {
 }
 
 type RedisConfigEnv struct {
-	Host     string        `env:"REDIS_HOST" default:"localhost" desc:"Redis server host"`
-	Port     uint16        `env:"REDIS_PORT" default:"6380" desc:"Redis server port"`
-	Timeout  time.Duration `env:"REDIS_TIMEOUT" default:"15s" desc:"Redis requests timeout"`
-	User     string        `env:"REDIS_USER" default:"user" desc:"Redis user"`
-	Password string        `env:"REDIS_USER_PASSWORD" default:"password" desc:"Redis user's password"`
-	DB       int           `env:"REDIS_DB" default:"0" desc:"Redis database connection"`
+	Host     string        `env:"REDIS_HOST" env-default:"localhost" desc:"Redis server host"`
+	Port     uint16        `env:"REDIS_PORT" env-default:"6380" desc:"Redis server port"`
+	Timeout  time.Duration `env:"REDIS_TIMEOUT" env-default:"15s" desc:"Redis requests timeout"`
+	User     string        `env:"REDIS_USER" env-default:"user" desc:"Redis user"`
+	Password string        `env:"REDIS_USER_PASSWORD" env-default:"password" desc:"Redis user's password"`
+	DB       int           `env:"REDIS_DB" env-default:"0" desc:"Redis database connection"`
 }
 
 func (RedisConfigEnv) Desc() string {

@@ -22,7 +22,7 @@ func init() {
 }
 
 type EnvConfig struct {
-	Env string `env:"ENV" default:"dev" desc:"The environment in which the application is running"`
+	Env string `env:"ENV" env-default:"dev" desc:"The environment in which the application is running"`
 }
 
 type Config struct {

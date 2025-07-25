@@ -23,7 +23,7 @@ type SqliteConfig struct {
 }
 
 type SqliteConfigEnv struct {
-	StorePath string `env:"SQLITE_STORE_PATH" default:"./storage/store.db" desc:"A path to sqlite store file"`
+	StorePath string `env:"SQLITE_STORE_PATH" env-default:"./storage/store.db" desc:"A path to sqlite store file"`
 }
 
 func (SqliteConfigEnv) Desc() string {
