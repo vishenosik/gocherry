@@ -5,75 +5,20 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/pkg/errors"
+	"github.com/vishenosik/gocherry/pkg/errors"
 	"github.com/vishenosik/gocherry/pkg/versions"
 )
 
 const (
 	VersionParam  = "v"
-	VersionHeader = "X-API-Version"
+	VersionHeader = "X-Api-Version"
 )
-
-var (
-	ErrFormat = errors.New("version must be in format MAJOR.MINOR")
-)
-
-// VersionHandler defines the interface for version handling
-type VersionHandler interface {
-	ParseRequest(r *http.Request) error
-	WithContext(ctx context.Context) context.Context
-}
-
-type Middleware = func(http.Handler) http.Handler
-
-type Handler = func(handlers HandlersMap) http.HandlerFunc
 
 // apiVersionKey is an unexported type for context keys to prevent collisions
 type apiVersionKey struct{}
 
-// APIVersion represents a parsed semantic version
-type APIVersion struct {
-	Version versions.Interface
-	param   string
-	header  string
-	minimal versions.Interface
-	current versions.Interface
-}
-
-type ApiVersionOption = func(*APIVersion)
-
-func defaultApiVersion(version versions.Interface) *APIVersion {
-	return &APIVersion{
-		Version: version,
-		minimal: version,
-		current: version,
-		param:   VersionParam,
-		header:  VersionHeader,
-	}
-}
-
-func newApiVersion(version versions.Interface, opts ...ApiVersionOption) (*APIVersion, error) {
-	if version == nil {
-		return nil, errors.New("version interface is nil")
-	}
-	av := defaultApiVersion(version)
-	for _, opt := range opts {
-		opt(av)
-	}
-	return av, nil
-}
-
-func Min(version string) ApiVersionOption {
-	return func(av *APIVersion) {
-		min, err := av.Version.Parse_(version)
-		if err == nil {
-			av.minimal = min
-		}
-	}
-}
-
 // ParseFirst parses the version from request (query param or header)
-func (av *APIVersion) ParseRequest(r *http.Request) error {
+func ParseDotVersion(r *http.Request) (versions.Interface, error) {
 
 	versionStr := r.URL.Query().Get(VersionParam)
 	if versionStr == "" {
@@ -81,40 +26,20 @@ func (av *APIVersion) ParseRequest(r *http.Request) error {
 	}
 
 	if versionStr == "" {
-		return errors.New("api version is not provided")
+		return nil, errors.New("api version is not provided")
 	}
 
-	version, err := av.Version.Parse_(versionStr)
+	version, err := versions.ParseDotVersion(versionStr)
 	if err != nil {
-		return errors.Wrap(err, "invalid version format")
+		return nil, errors.Wrap(err, "invalid version format")
 	}
 
-	if !version.In_(av.minimal, av.current) {
-		return fmt.Errorf("unsupported version. Min: %s, Max: %s", av.minimal, av.current)
-	}
-
-	av.Version = version
-	return nil
+	return version, nil
 }
 
 // WithContext adds the APIVersion to the context
-func (av *APIVersion) WithContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, apiVersionKey{}, av.Version)
-}
-
-// ApiVersionFromContext retrieves the APIVersion from context
-func TypedApiVersionFromContext[VersionType versions.Interface](ctx context.Context) (VersionType, error) {
-	var empty VersionType
-	val := ctx.Value(apiVersionKey{})
-	if val == nil {
-		return empty, errors.New("no API version in context")
-	}
-
-	version, ok := val.(VersionType)
-	if !ok {
-		return empty, errors.New("invalid API version type in context")
-	}
-	return version, nil
+func WithContext(ctx context.Context, v versions.Interface) context.Context {
+	return context.WithValue(ctx, apiVersionKey{}, v)
 }
 
 // ApiVersionFromContext retrieves the APIVersion from context
@@ -131,73 +56,57 @@ func ApiVersionFromContext(ctx context.Context) (versions.Interface, error) {
 	return version, nil
 }
 
-func ApiVersionMiddlewareHandler(version versions.Interface, opts ...ApiVersionOption) (Middleware, Handler) {
-	return ApiVersionMiddleware(version, opts...), ApiVersionHandler
+type HandlersMap = map[string]http.Handler
+
+func ApiVersionHandler(handlers HandlersMap) http.Handler {
+	latest := latestVersion(handlers)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		handler := func() http.Handler {
+
+			version, err := ParseDotVersion(r)
+			if err != nil {
+				return handlers[latest]
+			}
+
+			handler, ok := handlers[version.String()]
+			if !ok {
+				return handlers[latest]
+			}
+			return handler
+		}
+
+		handler().ServeHTTP(w, r)
+	})
 }
 
-func DotVersionMiddlewareHandler(version string, opts ...ApiVersionOption) (Middleware, Handler) {
-	return ApiVersionMiddlewareHandler(versions.NewDotVersion(version), opts...)
-}
+func latestVersion(handlers HandlersMap) string {
 
-// ApiVersionMiddleware validates the API version from request
-func ApiVersionMiddleware(
-	version versions.Interface,
-	opts ...ApiVersionOption,
-) Middleware {
+	if len(handlers) == 0 {
+		panic("handlers map can't be nil")
+	}
 
-	av, err := newApiVersion(version, opts...)
-	if err != nil {
+	mulerr := new(errors.MultiError)
+	_versions_ := make([]versions.DotVersion, 0, len(handlers))
+	for v, handler := range handlers {
+		if handler == nil {
+			mulerr.Append(fmt.Errorf("handler with version %s can't be nil", v))
+		}
+
+		version, err := versions.ParseDotVersion(v)
+		if err != nil {
+			mulerr.Append(errors.Wrapf(err, "version %s can't be parsed", v))
+		}
+
+		_versions_ = append(_versions_, version)
+
+	}
+
+	if err := mulerr.ErrorOrNil(); err != nil {
 		panic(err)
 	}
 
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if err := av.ParseRequest(r); err != nil {
-				SendErrors(w, http.StatusBadRequest, errors.Wrap(err, "API version error"))
-				return
-			}
-			ctx := context.WithValue(r.Context(), apiVersionKey{}, av.Version)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
-}
-
-type HandlersMap = map[string]http.HandlerFunc
-
-type HandlersSet = func(HandlersMap) http.HandlerFunc
-
-func DotVersionHandler(handlers HandlersMap) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		apiVersion, err := TypedApiVersionFromContext[versions.DotVersion](r.Context())
-		if err != nil {
-			SendErrors(w, http.StatusBadRequest, err)
-			return
-		}
-
-		handler, ok := handlers[apiVersion.String()]
-		if !ok || handler == nil {
-			SendErrors(w, http.StatusNotImplemented, errors.New("api version unsupported"))
-			return
-		}
-
-		handler(w, r)
-	}
-}
-
-func ApiVersionHandler(handlers HandlersMap) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		apiVersion, err := ApiVersionFromContext(r.Context())
-		if err != nil {
-			SendErrors(w, http.StatusBadRequest, err)
-			return
-		}
-
-		handler, ok := handlers[apiVersion.String()]
-		if !ok || handler == nil {
-			SendErrors(w, http.StatusNotImplemented, errors.New("api version unsupported"))
-			return
-		}
-
-		handler(w, r)
-	}
+	// latest version listed in handlers map
+	return versions.LatestDotVersion(_versions_...).String()
 }

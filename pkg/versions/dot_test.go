@@ -13,8 +13,7 @@ func TestMain(t *testing.T) {
 	v3 := NewDotVersion("1.0")
 	v4 := NewDotVersion("1.1")
 
-	require.True(t, v3.In_(v1, v2))
+	require.True(t, v3.In(v1, v2))
 
-	require.False(t, v4.In_(v1, v2))
-
+	require.False(t, v4.In(v1, v2))
 }

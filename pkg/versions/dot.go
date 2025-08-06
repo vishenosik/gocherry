@@ -3,6 +3,11 @@ package versions
 import (
 	"errors"
 	"fmt"
+	"sort"
+)
+
+var (
+	ErrDotFormat = errors.New("version must be in format MAJOR.MINOR")
 )
 
 type DotVersion struct {
@@ -12,7 +17,7 @@ type DotVersion struct {
 
 func NewDotVersion(version string) DotVersion {
 	var v DotVersion
-	v, err := v.Parse(version)
+	v, err := ParseDotVersion(version)
 	if err != nil {
 		panic(err)
 	}
@@ -20,11 +25,11 @@ func NewDotVersion(version string) DotVersion {
 }
 
 // Parse parses a semantic version string into a SemanticVersion
-func (v DotVersion) Parse(version string) (DotVersion, error) {
+func ParseDotVersion(version string) (DotVersion, error) {
 	var double DotVersion
 	_, err := fmt.Sscanf(version, "%d.%d", &double.Major, &double.Minor)
 	if err != nil {
-		return DotVersion{}, fmt.Errorf("invalid semantic version: %w", err)
+		return DotVersion{}, ErrDotFormat
 	}
 	return double, nil
 }
@@ -78,12 +83,13 @@ func (v1 DotVersion) GTE(v2 DotVersion) bool {
 	return true
 }
 
-// Parse parses a semantic version string into a SemanticVersion
-func (v DotVersion) Parse_(version string) (Interface, error) {
-	var double DotVersion
-	_, err := fmt.Sscanf(version, "%d.%d", &double.Major, &double.Minor)
-	if err != nil {
-		return DotVersion{}, errors.New("version must be format MAJOR.MINOR")
-	}
-	return double, nil
+func LatestDotVersion(versions ...DotVersion) DotVersion {
+
+	// Sort versions in descending order
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i].GTE(versions[j])
+	})
+
+	return versions[0]
+
 }
