@@ -19,15 +19,6 @@ type flagset struct {
 	*flag.FlagSet
 }
 
-func NewFlagSet(name string, errorHandling flag.ErrorHandling, writer io.Writer) *flagset {
-	flags := flag.NewFlagSet(name, errorHandling)
-	flags.SetOutput(io.Discard)
-	return &flagset{
-		writer:  writer,
-		FlagSet: flags,
-	}
-}
-
 func (f *flagset) Parse(arguments []string) error {
 
 	print := func(msg string) {
@@ -49,50 +40,21 @@ func (f *flagset) Parse(arguments []string) error {
 	return nil
 }
 
-func AppFlags(writer io.Writer, args []string) {
-
-	flags := NewFlagSet("app flags", flag.ContinueOnError, writer)
-
-	flags.BoolFunc("version", "Show build info", func(s string) error {
-		BuildInfoYaml(writer)
-		return ErrSuccessExit
-	})
-
-	flags.Parse(args)
-}
-
-func ConfigFlags(writer io.Writer, args []string, structs ...any) {
-	var exitCode int
-
-	defer func() {
-		os.Exit(exitCode)
-	}()
-
-	if err := configFlags(writer, args, structs...); err != nil {
-		if errors.Is(err, flag.ErrHelp) {
-			exitCode = 2
-			return
-		}
-
-		if errors.Is(err, ErrSuccessExit) {
-			exitCode = 2
-			return
-		}
-
-		exitCode = 1
+func AppFlags(writer io.Writer) func(*flagset) {
+	return func(f *flagset) {
+		f.BoolFunc("version", "Show build info", func(s string) error {
+			BuildInfoYaml(writer)
+			return ErrSuccessExit
+		})
 	}
 }
 
-func configFlags(writer io.Writer, args []string, structs ...any) error {
+func ConfigFlags(writer io.Writer, structs ...any) func(*flagset) {
 
-	flags := NewFlagSet("config flags", flag.ContinueOnError, writer)
-	flags.SetOutput(io.Discard)
-
-	_structs := append(structs, config.Structs()...)
-	flags.BoolFunc("config.info", "Show config schema information", FlagConfigInfoEnv(writer, _structs...))
-	flags.Func("config.gen", "Generate config schema", FlagConfigGenEnv(_structs...))
-
-	return flags.Parse(args)
+	return func(f *flagset) {
+		f.BoolFunc("config.info", "Show config schema information", FlagConfigInfoEnv(writer, structs...))
+		f.Func("config.gen", "Generate config schema", FlagConfigGenEnv(structs...))
+	}
 }
 
 func FlagConfigInfoEnv(writer io.Writer, structs ...any) func(string) error {
@@ -113,4 +75,30 @@ func FlagConfigGenEnv(structs ...any) func(string) error {
 		}
 		return FlagConfigInfoEnv(file, structs...)(filename)
 	}
+}
+
+func Flags(writer io.Writer, args []string, flagsets ...func(*flagset)) {
+	if err := parseFlags(writer, args, flagsets...); err != nil {
+		if errors.Is(err, flag.ErrHelp) || errors.Is(err, ErrSuccessExit) {
+			os.Exit(2)
+		}
+		os.Exit(1)
+	}
+}
+
+func parseFlags(writer io.Writer, args []string, flagsets ...func(*flagset)) error {
+
+	flags := flag.NewFlagSet("app flags", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+
+	flagSet := &flagset{
+		writer:  writer,
+		FlagSet: flags,
+	}
+
+	for _, flagset := range flagsets {
+		flagset(flagSet)
+	}
+
+	return flagSet.Parse(args)
 }

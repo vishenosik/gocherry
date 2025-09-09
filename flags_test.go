@@ -24,13 +24,38 @@ func (t *T) Run(name string, f func(t *testing.T)) bool {
 	return t.T.Run(name, f)
 }
 
-func TestParseConfigFlags(_t *testing.T) {
+func TestFlagsErrors(_t *testing.T) {
+
+	t := &T{_t}
+
+	t.Run("unknown flag", func(t *testing.T) {
+		var buf bytes.Buffer
+		err := parseFlags(&buf, []string{"-config.unknown"},
+			ConfigFlags(&buf, TestConfig{}),
+		)
+		require.Error(t, err)
+		require.NotEmpty(t, buf.String())
+	})
+
+	t.Run("help flag", func(t *testing.T) {
+		var buf bytes.Buffer
+		err := parseFlags(&buf, []string{"-help"},
+			ConfigFlags(&buf, TestConfig{}),
+		)
+		require.ErrorIs(t, err, flag.ErrHelp)
+		require.NotEmpty(t, buf.String())
+	})
+}
+
+func TestConfigFlags(_t *testing.T) {
 
 	t := &T{_t}
 
 	t.Run("config info", func(t *testing.T) {
 		var buf bytes.Buffer
-		err := configFlags(&buf, []string{"-config.info"}, TestConfig{})
+		err := parseFlags(&buf, []string{"-config.info"},
+			ConfigFlags(&buf, TestConfig{}),
+		)
 		require.ErrorIs(t, err, ErrSuccessExit)
 		require.Equal(t, buf.String(), configInfo)
 	})
@@ -45,7 +70,9 @@ func TestParseConfigFlags(_t *testing.T) {
 		require.NoError(t, err)
 
 		var buf bytes.Buffer
-		err = configFlags(&buf, []string{"-config.gen", file.Name()}, TestConfig{})
+		err = parseFlags(&buf, []string{"-config.gen", file.Name()},
+			ConfigFlags(&buf, TestConfig{}),
+		)
 		require.ErrorIs(t, err, ErrSuccessExit)
 		require.Empty(t, buf.String(), configInfo)
 
@@ -55,19 +82,6 @@ func TestParseConfigFlags(_t *testing.T) {
 
 	})
 
-	t.Run("unknown flag", func(t *testing.T) {
-		var buf bytes.Buffer
-		err := configFlags(&buf, []string{"-config.unknown"}, TestConfig{})
-		require.Error(t, err)
-		require.NotEmpty(t, buf.String())
-	})
-
-	t.Run("help flag", func(t *testing.T) {
-		var buf bytes.Buffer
-		err := configFlags(&buf, []string{"-help"}, TestConfig{})
-		require.ErrorIs(t, err, flag.ErrHelp)
-		require.NotEmpty(t, buf.String())
-	})
 }
 
 type TestConfig struct {

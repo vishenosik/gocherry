@@ -15,7 +15,11 @@ type StructsManager struct {
 var _structs *StructsManager
 
 func Manager() *StructsManager {
-	defaultManager()
+	if _structs == nil {
+		_structs = &StructsManager{
+			structs: make([]any, 0),
+		}
+	}
 	return _structs
 }
 
@@ -25,15 +29,6 @@ func AddStructs(structs ...any) {
 
 func (sm *StructsManager) Cleanup() {
 	sm.structs = nil
-}
-
-func defaultManager() {
-	if _structs != nil {
-		return
-	}
-	_structs = &StructsManager{
-		structs: make([]any, 0),
-	}
 }
 
 func Structs() []any {
@@ -50,6 +45,8 @@ type Header interface {
 }
 
 func ConfigInfoEnv(writer io.Writer, structs ...any) {
+
+	structs = append(structs, Structs()...)
 
 	writeHeader := func(header string) {
 		_, _ = writer.Write(fmt.Appendf([]byte{}, headerFormat, header))

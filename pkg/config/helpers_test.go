@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -32,6 +33,7 @@ func TestConfigInfoEnv(_t *testing.T) {
 		var buf bytes.Buffer
 		AddStructs(TestConfig{})
 		ConfigInfoEnv(&buf)
+		fmt.Println(_structs)
 		require.Equal(t, configInfoTestStraight, buf.String())
 	})
 
@@ -39,6 +41,9 @@ func TestConfigInfoEnv(_t *testing.T) {
 		var buf bytes.Buffer
 		AddStructs(TestConfig{})
 		ConfigInfoEnv(&buf, TestConfig{})
+
+		fmt.Println(_structs)
+
 		require.Equal(t, configInfoTestCombined, buf.String())
 	})
 
