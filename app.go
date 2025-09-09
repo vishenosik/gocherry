@@ -2,11 +2,8 @@ package gocherry
 
 import (
 	"context"
-	"flag"
 	"log/slog"
-	"os"
 
-	"github.com/vishenosik/gocherry/pkg/config"
 	"github.com/vishenosik/gocherry/pkg/logs"
 
 	_ctx "github.com/vishenosik/gocherry/pkg/context"
@@ -95,22 +92,4 @@ func (app *App) Stop(ctx context.Context) error {
 
 	app.Log.Info("app stopped")
 	return nil
-}
-
-func ConfigFlags(structs ...any) {
-
-	_structs := append(structs, config.Structs()...)
-
-	flag.BoolFunc(
-		"config.info",
-		"Show config schema information",
-		config.ConfigInfoEnv(os.Stdout, _structs...),
-	)
-
-	flag.Func(
-		"config.gen",
-		"Generate config schema",
-		config.ConfigGenEnv(_structs...),
-	)
-
 }

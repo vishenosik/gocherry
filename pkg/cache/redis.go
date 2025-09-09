@@ -52,7 +52,7 @@ func NewRedisCache(opts ...RedisOption) (CacheProvider, error) {
 
 func newRedisCache(opts ...RedisOption) (*RedisCache, error) {
 	var envConf RedisConfigEnv
-	if err := config.ReadConfig(&envConf); err != nil {
+	if err := config.ReadConfigEnv(&envConf); err != nil {
 		return nil, errors.Wrap(err, "setup logger: failed to read config")
 	}
 

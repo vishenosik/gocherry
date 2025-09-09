@@ -50,7 +50,7 @@ func validateSqliteConfig(conf SqliteConfig) error {
 
 func NewSqliteStore(opts ...SqliteStoreOption) (*SqliteStore, error) {
 	var envConf SqliteConfigEnv
-	if err := config.ReadConfig(&envConf); err != nil {
+	if err := config.ReadConfigEnv(&envConf); err != nil {
 		return nil, errors.Wrap(err, "setup logger: failed to read config")
 	}
 

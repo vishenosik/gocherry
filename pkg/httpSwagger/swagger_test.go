@@ -520,13 +520,13 @@ func TestUIConfigOptions(t *testing.T) {
 				if lastIdx > buflen {
 					lastIdx = buflen
 				}
-				t.Logf("expected:\n")
+				t.Log("expected:\n")
 				for i := firstIdx; i < lastIdx; i++ {
-					t.Logf(explns[i])
+					t.Log(explns[i])
 				}
 				t.Logf("got:\n")
 				for i := firstIdx; i < lastIdx; i++ {
-					t.Logf(buflns[i])
+					t.Log(buflns[i])
 				}
 			}
 

@@ -30,7 +30,7 @@ type Credentials struct {
 	Password string
 }
 
-func ReadConfig(conf any) error {
+func ReadConfigEnv(conf any) error {
 	if err := cleanenv.ReadConfig(".env", conf); err != nil {
 		return cleanenv.ReadEnv(conf)
 	}

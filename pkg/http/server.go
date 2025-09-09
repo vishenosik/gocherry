@@ -53,7 +53,7 @@ func NewHttpServer(
 	log := logs.SetupLogger().With(appComponent())
 
 	var envConf ConfigEnv
-	if err := config.ReadConfig(&envConf); err != nil {
+	if err := config.ReadConfigEnv(&envConf); err != nil {
 		log.Warn("init http server: failed to read config", logs.Error(err))
 	}
 

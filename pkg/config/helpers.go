@@ -4,66 +4,64 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"reflect"
 	"strings"
 )
 
-var (
-	_structs []any
-)
-
-func AddStructs(structs ...any) {
-	if len(_structs) == 0 {
-		_structs = make([]any, 0, len(structs))
-	}
-	_structs = append(_structs, structs...)
+type StructsManager struct {
+	structs []any
 }
 
-func Structs() []any {
+var _structs *StructsManager
+
+func Manager() *StructsManager {
+	defaultManager()
 	return _structs
 }
 
+func AddStructs(structs ...any) {
+	Manager().structs = append(Manager().structs, structs...)
+}
+
+func (sm *StructsManager) Cleanup() {
+	sm.structs = nil
+}
+
+func defaultManager() {
+	if _structs != nil {
+		return
+	}
+	_structs = &StructsManager{
+		structs: make([]any, 0),
+	}
+}
+
+func Structs() []any {
+	return _structs.structs
+}
+
 const (
-	whiteSpace = 32
+	whiteSpace   = 32
+	headerFormat = "\n#=== %s ===#\n\n"
 )
 
 type Header interface {
 	Desc() string
 }
 
-func ConfigInfoEnv(writer io.Writer, structs ...any) func(string) error {
-	return func(string) error {
-		defer os.Exit(0)
+func ConfigInfoEnv(writer io.Writer, structs ...any) {
 
-		for _, _struct := range structs {
-
-			if header, ok := _struct.(Header); ok {
-				writeHeader(writer, header.Desc())
-			} else {
-				writeHeader(writer, reflect.TypeOf(_struct).String())
-			}
-
-			writer.Write(genEnvConfig(_struct))
-		}
-		return nil
+	writeHeader := func(header string) {
+		_, _ = writer.Write(fmt.Appendf([]byte{}, headerFormat, header))
 	}
-}
 
-func writeHeader(writer io.Writer, header string) {
-	writer.Write(fmt.Appendf([]byte{}, "\n#=== %s ===#\n\n", header))
-}
-
-func ConfigGenEnv(structs ...any) func(string) error {
-	return func(filename string) error {
-		if filename == "" {
-			filename = "example.env"
+	for _, _struct := range structs {
+		if header, ok := _struct.(Header); ok {
+			writeHeader(header.Desc())
+		} else {
+			writeHeader(reflect.TypeOf(_struct).String())
 		}
-		file, err := os.Create(filename)
-		if err != nil {
-			return err
-		}
-		return ConfigInfoEnv(file, structs...)(filename)
+		writer.Write(genEnvConfig(_struct))
 	}
 }
 
@@ -142,7 +140,7 @@ func genEnvConfigRecursively(writer io.Writer, _type reflect.Type) {
 			writer.Write([]byte(envTag + "="))
 		}
 
-		if defaultTag, ok := field.Tag.Lookup("default"); ok {
+		if defaultTag, ok := field.Tag.Lookup("env-default"); ok {
 			writer.Write([]byte(defaultTag))
 		}
 

@@ -2,9 +2,7 @@ package gocherry
 
 import (
 	"encoding/json"
-	"flag"
 	"io"
-	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -43,16 +41,6 @@ func init() {
 		GoVersion: GoVersion,
 		GitTag:    GitTag,
 	}
-}
-
-func AppFlags() {
-
-	flag.BoolFunc("version", "Show build info", func(s string) error {
-		defer os.Exit(0)
-		BuildInfoYaml(os.Stdout)
-		return nil
-	})
-
 }
 
 func BuildInfoYaml(writer io.Writer) {

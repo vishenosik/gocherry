@@ -41,7 +41,7 @@ func validateConfig(conf Config) error {
 
 func SetupLogger() *slog.Logger {
 	var envConf EnvConfig
-	if err := config.ReadConfig(&envConf); err != nil {
+	if err := config.ReadConfigEnv(&envConf); err != nil {
 		// log.Println(errors.Wrap(err, "setup logger: failed to read config"))
 	}
 
