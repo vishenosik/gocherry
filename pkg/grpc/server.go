@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"net"
-	"time"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -22,20 +21,10 @@ type Server struct {
 	log *slog.Logger
 	// server is the main gRPC server instance.
 	server *grpc.Server
+	// interceptors
+	interceptors []grpc.ServerOption
+	// config
 	config Config
-}
-
-func init() {
-	config.AddStructs(ConfigEnv{})
-}
-
-type ConfigEnv struct {
-	Port    uint16        `env:"GRPC_PORT" env-default:"9090" desc:"grpc server port"`
-	Timeout time.Duration `env:"GRPC_TIMEOUT" env-default:"15s" desc:"grpc timeout"`
-}
-
-func (ConfigEnv) Desc() string {
-	return "gRPC server settings"
 }
 
 type Config struct {
@@ -62,12 +51,6 @@ func NewGrpcServer(
 		log.Warn("init http server: failed to read config", logs.Error(err))
 	}
 
-	server := grpc.NewServer()
-
-	for _, service := range services {
-		service.RegisterService(server)
-	}
-
 	config := Config{
 		Server: config.Server{
 			Port:    envConf.Port,
@@ -77,12 +60,17 @@ func NewGrpcServer(
 
 	srv := &Server{
 		log:    log,
-		server: server,
 		config: config,
 	}
 
 	for _, opt := range opts {
 		opt(srv)
+	}
+
+	srv.server = grpc.NewServer(srv.interceptors...)
+
+	for _, service := range services {
+		service.RegisterService(srv.server)
 	}
 
 	if err := validateConfig(config); err != nil {
