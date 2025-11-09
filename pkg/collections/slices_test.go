@@ -94,8 +94,11 @@ func randomStringSlice(n int) []string {
 func BenchmarkUnique(b *testing.B) {
 	// Start memory profiling
 	pp := profile.Start(
-		profile.MemProfile, profile.ProfilePath("./pprof.out"),
-		profile.MemProfileRate(1), profile.NoShutdownHook,
+		profile.MemProfile,
+		profile.CPUProfile,
+		profile.ProfilePath("./pprof.out/BenchmarkUnique"),
+		profile.MemProfileRate(1),
+		profile.NoShutdownHook,
 	)
 	defer pp.Stop()
 
@@ -111,13 +114,13 @@ func BenchmarkUnique(b *testing.B) {
 				Unique(slice)
 			}
 		})
-		b.Run(fmt.Sprintf("unique_string_size_%d", size), func(b *testing.B) {
-			slice := randomStringSlice(size)
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				Unique(slice)
-			}
-		})
+		// b.Run(fmt.Sprintf("unique_string_size_%d", size), func(b *testing.B) {
+		// 	slice := randomStringSlice(size)
+		// 	b.ResetTimer()
+		// 	for i := 0; i < b.N; i++ {
+		// 		Unique(slice)
+		// 	}
+		// })
 	}
 }
 

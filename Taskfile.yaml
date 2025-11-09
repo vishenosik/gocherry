@@ -3,4 +3,14 @@ version: "3"
 tasks:
   test:
     desc: "Test all packages"
-    cmd: go test -v -cover ./...
+    cmd: go test -v -cover -coverprofile=cover.out ./...
+
+  bench:
+    desc: Run benchmarks
+    cmd: go test -bench . -benchmem ./pkg/collections -cpuprofile=./profiles/cpu.out -memprofile=./profiles/mem.out
+
+  prof:
+    desc: Use pprof 
+    cmds:
+      - go tool pprof --pdf ./profiles/cpu.out > ./profiles/cpu-prof.pdf
+      - go tool pprof --pdf ./profiles/mem.out > ./profiles/mem-prof.pdf 
