@@ -47,7 +47,7 @@ func LogUnaryRequest(log *slog.Logger) grpc.UnaryServerInterceptor {
 				slog.Int("code", int(st.Code())),
 			)
 		} else {
-			log.Info("request completed successfully",
+			log.Info("request completed",
 				slog.String("method", info.FullMethod),
 				logs.Took(timeStart),
 			)
