@@ -2,8 +2,10 @@ package gocherry
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/vishenosik/gocherry/pkg/errors"
 	"github.com/vishenosik/gocherry/pkg/logs"
 
 	_ctx "github.com/vishenosik/gocherry/pkg/context"
@@ -51,13 +53,23 @@ func (app *App) AddServices(services ...any) {
 		app.closers = make([]Closer, 0, len(services))
 	}
 
+	rejected := make([]string, 0)
+
 	for _, service := range services {
 		switch srv := service.(type) {
 		case Service:
 			app.services = append(app.services, srv)
 		case Closer:
 			app.closers = append(app.closers, srv)
+		default:
+			rejected = append(rejected, fmt.Sprintf("%T", srv))
 		}
+	}
+
+	if len(rejected) > 0 {
+		app.Log.Error("services with types doesn't implement gocherry.Service or gocherry.Closer interfaces",
+			slog.Any("types", rejected),
+		)
 	}
 }
 
@@ -71,9 +83,11 @@ func (app *App) Start(ctx context.Context) error {
 	return nil
 }
 
-func (app *App) Stop(ctx context.Context) error {
+func (app *App) Stop(ctx context.Context) {
 
 	const msg = "app stopping"
+
+	result := new(errors.MultiError)
 
 	signal, ok := _ctx.StopFromCtx(ctx)
 	if ok {
@@ -83,13 +97,23 @@ func (app *App) Stop(ctx context.Context) error {
 	}
 
 	for _, service := range app.services {
-		service.Stop(ctx)
+		err := service.Stop(ctx)
+		if err != nil {
+			result.Append(err)
+		}
 	}
 
 	for _, closer := range app.closers {
-		closer.Close(ctx)
+		err := closer.Close(ctx)
+		if err != nil {
+			result.Append(err)
+		}
 	}
 
-	app.Log.Info("app stopped")
-	return nil
+	err := result.ErrorOrNil()
+	if err != nil {
+		app.Log.Error("app stopped with errors", logs.Error(err))
+	} else {
+		app.Log.Info("app stopped")
+	}
 }

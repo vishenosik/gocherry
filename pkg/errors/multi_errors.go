@@ -1,8 +1,11 @@
 package errors
 
 import (
+	"encoding/json"
+
 	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 type MultiError struct {
@@ -93,4 +96,30 @@ func (er *MultiError) AppendCriticalWrap(err error, message string) {
 
 func (er *MultiError) AppendCriticalWrapf(err error, format string, args ...any) {
 	er.append(err, true, func(err error) error { return errors.Wrapf(err, format, args...) })
+}
+
+type marshalableMultiError struct {
+	Critical string   `yaml:"critical,omitempty" json:"critical,omitempty"`
+	Errors   []string `yaml:"errors,omitempty" json:"errors,omitempty"`
+}
+
+func toMarshalable(er *MultiError) marshalableMultiError {
+	return marshalableMultiError{
+		Critical: er.CriticalString(),
+		Errors:   er.List(),
+	}
+}
+
+func (er *MultiError) MarshalJSON() ([]byte, error) {
+	if er.errs == nil {
+		return json.Marshal(nil)
+	}
+	return json.Marshal(toMarshalable(er))
+}
+
+func (er *MultiError) MarshalYAML() (any, error) {
+	if er.errs == nil {
+		return yaml.Marshal(nil)
+	}
+	return yaml.Marshal(toMarshalable(er))
 }

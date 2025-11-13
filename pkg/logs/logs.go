@@ -4,6 +4,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"sync"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
@@ -15,6 +16,11 @@ const (
 	EnvDev  = "dev"
 	EnvProd = "prod"
 	EnvTest = "test"
+)
+
+var (
+	once sync.Once
+	glob *slog.Logger
 )
 
 func init() {
@@ -45,9 +51,13 @@ func SetupLogger() *slog.Logger {
 		// log.Println(errors.Wrap(err, "setup logger: failed to read config"))
 	}
 
-	return SetupLoggerConf(Config{
-		Env: envConf.Env,
+	once.Do(func() {
+		glob = SetupLoggerConf(Config{
+			Env: envConf.Env,
+		})
 	})
+
+	return glob
 }
 
 func SetupLoggerConf(conf Config) *slog.Logger {

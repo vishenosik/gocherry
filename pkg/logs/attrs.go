@@ -19,7 +19,7 @@ const (
 )
 
 func Error(err error) slog.Attr {
-	return slog.String(AttrError, err.Error())
+	return slog.Any(AttrError, err)
 }
 
 func Operation(op string) slog.Attr {
