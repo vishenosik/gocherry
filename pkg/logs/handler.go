@@ -93,8 +93,8 @@ func (h *Handler) Handle(ctx context.Context, rec slog.Record) error {
 		return err
 	}
 
-	attrsStr = h.highlight.HighlightNumbers(attrsStr)
 	attrsStr = h.highlight.HighlightKeyWords(attrsStr)
+	attrsStr = h.highlight.HighlightNumbers(attrsStr)
 
 	if attrsStr != "" {
 		builder.WriteString(fmt.Sprintf("%s\n", attrsStr))

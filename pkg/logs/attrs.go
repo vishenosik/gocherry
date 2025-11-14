@@ -2,11 +2,13 @@ package logs
 
 import (
 	// builtin
+	"encoding/json"
 	"log/slog"
 	"time"
 
 	// internal
 	time_helper "github.com/vishenosik/gocherry/pkg/time"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -19,7 +21,15 @@ const (
 )
 
 func Error(err error) slog.Attr {
-	return slog.Any(AttrError, err)
+
+	_, jsonOk := err.(json.Marshaler)
+	_, yamlOk := err.(yaml.Marshaler)
+
+	if jsonOk && yamlOk {
+		return slog.Any(AttrError, err)
+	}
+
+	return slog.Any(AttrError, err.Error())
 }
 
 func Operation(op string) slog.Attr {

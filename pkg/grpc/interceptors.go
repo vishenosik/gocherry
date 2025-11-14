@@ -20,9 +20,9 @@ func WithLogInterceptors() ServerOption {
 	return func(srv *Server) {
 		srv.interceptors = append(srv.interceptors,
 			// Unary
-			grpc.UnaryInterceptor(LogUnaryRequest(srv.log)),
+			grpc.UnaryInterceptor(LogUnaryRequest(srv.log.With(logs.Operation("unary_interceptor")))),
 			// Stream
-			grpc.StreamInterceptor(LogStreamRequest(srv.log)),
+			grpc.StreamInterceptor(LogStreamRequest(srv.log.With(logs.Operation("stream_interceptor")))),
 		)
 	}
 }
@@ -43,7 +43,7 @@ func LogUnaryRequest(log *slog.Logger) grpc.UnaryServerInterceptor {
 			log.Error("request failed",
 				slog.String("method", info.FullMethod),
 				logs.Took(timeStart),
-				slog.String("error", err.Error()),
+				logs.Error(err),
 				slog.Int("code", int(st.Code())),
 			)
 		} else {
@@ -77,7 +77,7 @@ func LogStreamRequest(log *slog.Logger) grpc.StreamServerInterceptor {
 			log.Error("stream failed",
 				slog.String("method", info.FullMethod),
 				logs.Took(timeStart),
-				slog.String("error", err.Error()),
+				logs.Error(err),
 				slog.Int("code", int(st.Code())),
 			)
 		} else {
