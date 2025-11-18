@@ -20,7 +20,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files/v2 v2.0.2
 	github.com/swaggo/swag/v2 v2.0.0-rc4
-	github.com/vishenosik/concurrency v0.0.2
+	github.com/vishenosik/concurrency v0.0.3
 	github.com/vishenosik/dmigrate v0.0.1
 	google.golang.org/grpc v1.72.1
 	gopkg.in/yaml.v2 v2.4.0
