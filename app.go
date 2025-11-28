@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sync"
 
 	"github.com/vishenosik/gocherry/pkg/errors"
 	"github.com/vishenosik/gocherry/pkg/logs"
@@ -24,6 +25,8 @@ type App struct {
 	Log      *slog.Logger
 	services []Service
 	closers  []Closer
+
+	once sync.Once
 }
 
 type AppOption = func(*App)
@@ -45,13 +48,10 @@ func NewApp(opts ...AppOption) (*App, error) {
 
 func (app *App) AddServices(services ...any) {
 
-	if len(app.services) == 0 {
+	app.once.Do(func() {
 		app.services = make([]Service, 0, len(services))
-	}
-
-	if len(app.closers) == 0 {
 		app.closers = make([]Closer, 0, len(services))
-	}
+	})
 
 	rejected := make([]string, 0)
 
