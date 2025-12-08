@@ -27,3 +27,7 @@ func (tb *TelegramBot) Route(command string, handler HandlerFunc) {
 	tb.commands[command] = handler
 
 }
+
+func (tb *TelegramBot) Bot() *tgbotapi.BotAPI {
+	return tb.bot
+}
