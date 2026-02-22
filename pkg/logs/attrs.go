@@ -21,7 +21,6 @@ const (
 )
 
 func Error(err error) slog.Attr {
-
 	_, jsonOk := err.(json.Marshaler)
 	_, yamlOk := err.(yaml.Marshaler)
 

@@ -6,10 +6,9 @@ import (
 	"log/slog"
 	"sync"
 
+	_ctx "github.com/vishenosik/gocherry/pkg/context"
 	"github.com/vishenosik/gocherry/pkg/errors"
 	"github.com/vishenosik/gocherry/pkg/logs"
-
-	_ctx "github.com/vishenosik/gocherry/pkg/context"
 )
 
 type Service interface {
@@ -32,7 +31,6 @@ type App struct {
 type AppOption = func(*App)
 
 func NewApp(opts ...AppOption) (*App, error) {
-
 	log := logs.SetupLogger()
 
 	app := &App{
@@ -47,7 +45,6 @@ func NewApp(opts ...AppOption) (*App, error) {
 }
 
 func (app *App) AddServices(services ...any) {
-
 	app.once.Do(func() {
 		app.services = make([]Service, 0, len(services))
 		app.closers = make([]Closer, 0, len(services))
@@ -74,17 +71,20 @@ func (app *App) AddServices(services ...any) {
 }
 
 func (app *App) Start(ctx context.Context) error {
-
 	app.Log.Info("start app")
 
 	for _, service := range app.services {
-		go service.Start(ctx)
+		go func() {
+			err := service.Start(ctx)
+			if err != nil {
+				app.Log.Error("service start failed", logs.Error(err))
+			}
+		}()
 	}
 	return nil
 }
 
 func (app *App) Stop(ctx context.Context) {
-
 	const msg = "app stopping"
 
 	result := new(errors.MultiError)

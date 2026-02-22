@@ -6,10 +6,9 @@ import (
 	"net"
 
 	"github.com/pkg/errors"
-	"google.golang.org/grpc"
-
 	"github.com/vishenosik/gocherry/pkg/config"
 	"github.com/vishenosik/gocherry/pkg/logs"
+	"google.golang.org/grpc"
 )
 
 func appComponent() slog.Attr {
@@ -43,7 +42,6 @@ func NewGrpcServer(
 	services GrpcServices,
 	opts ...ServerOption,
 ) (*Server, error) {
-
 	log := logs.SetupLogger().With(appComponent())
 
 	var envConf ConfigEnv
@@ -105,7 +103,6 @@ func (a *Server) Start(_ context.Context) error {
 }
 
 func (a *Server) Stop(ctx context.Context) error {
-
 	const op = "grpc.Server.Stop"
 
 	a.log.With(logs.Operation(op)).

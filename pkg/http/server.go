@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
 	"github.com/vishenosik/gocherry/pkg/config"
 	"github.com/vishenosik/gocherry/pkg/logs"
 )
@@ -45,7 +44,6 @@ func NewHttpServer(
 	handler http.Handler,
 	opts ...ServerOption,
 ) (*Server, error) {
-
 	if handler == nil {
 		return nil, errors.New("handler can't be nil")
 	}
@@ -101,7 +99,6 @@ func (a *Server) Start(_ context.Context) error {
 }
 
 func (a *Server) Stop(ctx context.Context) error {
-
 	const op = "http.Server.Stop"
 
 	a.log.Info("stopping server", logs.Operation(op), slog.Any("port", a.config.Server.Port))

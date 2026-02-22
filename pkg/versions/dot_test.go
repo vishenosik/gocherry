@@ -7,7 +7,6 @@ import (
 )
 
 func TestMain(t *testing.T) {
-
 	v1 := NewDotVersion("1.0")
 	v2 := NewDotVersion("1.0")
 	v3 := NewDotVersion("1.0")

@@ -19,7 +19,6 @@ type apiVersionKey struct{}
 
 // ParseFirst parses the version from request (query param or header)
 func ParseDotVersion(r *http.Request) (versions.Interface, error) {
-
 	versionStr := r.URL.Query().Get(VersionParam)
 	if versionStr == "" {
 		versionStr = r.Header.Get(VersionHeader)
@@ -62,9 +61,7 @@ func ApiVersionHandler(handlers HandlersMap) http.Handler {
 	latest := latestVersion(handlers)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		handler := func() http.Handler {
-
 			version, err := ParseDotVersion(r)
 			if err != nil {
 				return handlers[latest]
@@ -82,7 +79,6 @@ func ApiVersionHandler(handlers HandlersMap) http.Handler {
 }
 
 func latestVersion(handlers HandlersMap) string {
-
 	if len(handlers) == 0 {
 		panic("handlers map can't be nil")
 	}

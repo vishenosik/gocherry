@@ -68,8 +68,8 @@ func writeBuildInfo(writer io.Writer, format int) {
 		return
 	}
 	if err != nil {
-		writer.Write([]byte(err.Error()))
+		_, err = writer.Write([]byte(err.Error()))
 		return
 	}
-	writer.Write(buf)
+	_, err = writer.Write(buf)
 }

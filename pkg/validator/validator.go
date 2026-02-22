@@ -4,9 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var (
-	valid = validator.New()
-)
+var valid = validator.New()
 
 func Struct(Struct any) error {
 	return valid.Struct(Struct)

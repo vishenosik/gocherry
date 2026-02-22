@@ -51,7 +51,7 @@ func HasDuplicates[Type comparable](slice ...Type) bool {
 	return len(slice) != len(Unique(slice))
 }
 
-func ConvertSlice[Type1 any, Type2 any](t1 []Type1, converter func(Type1) Type2) []Type2 {
+func ConvertSlice[Type1, Type2 any](t1 []Type1, converter func(Type1) Type2) []Type2 {
 	out := make([]Type2, 0, len(t1))
 	for _, t := range t1 {
 		out = append(out, converter(t))

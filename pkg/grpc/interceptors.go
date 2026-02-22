@@ -34,7 +34,6 @@ func LogUnaryRequest(log *slog.Logger) grpc.UnaryServerInterceptor {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
-
 		timeStart := time.Now()
 		resp, err := handler(ctx, req)
 

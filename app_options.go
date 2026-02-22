@@ -17,7 +17,6 @@ func WithHttpRoutes(handler http.Handler) AppOption {
 		server, err := _http.NewHttpServer(
 			handler,
 		)
-
 		if err != nil {
 			app.Log.Warn("failed to add http service", logs.Error(err))
 			return

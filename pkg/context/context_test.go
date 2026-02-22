@@ -35,7 +35,6 @@ func Test_Context(t *testing.T) {
 }
 
 func Test_RequestContext(t *testing.T) {
-
 	requestID := "requestID"
 
 	ctx := WithRequestCtx(context.Background(), requestID)

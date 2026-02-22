@@ -6,14 +6,12 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/pkg/profile"
 	"github.com/stretchr/testify/require"
-
-	"github.com/brianvoe/gofakeit/v6"
 )
 
 func TestFilter(t *testing.T) {
-
 	numbers := intSlice(100_000_000)
 
 	filtered := Filter(Iter(numbers), func(i int) bool {
@@ -23,11 +21,9 @@ func TestFilter(t *testing.T) {
 	s := slices.Collect(filtered)
 
 	t.Log(len(s))
-
 }
 
 func TestFilter1(t *testing.T) {
-
 	numbers := intSlice(100_000_000)
 
 	filtered, cnt := FilterCount(Iter(numbers), func(i int) bool {
@@ -40,11 +36,9 @@ func TestFilter1(t *testing.T) {
 	}
 
 	t.Log(len(out))
-
 }
 
 func TestFilter2(t *testing.T) {
-
 	numbers := intSlice(100_000_000)
 
 	var out []int
@@ -55,7 +49,6 @@ func TestFilter2(t *testing.T) {
 	}
 
 	t.Log(len(out))
-
 }
 
 func intSlice(n int) []int {
@@ -125,7 +118,6 @@ func BenchmarkUnique(b *testing.B) {
 }
 
 func TestUnique(t *testing.T) {
-
 	// Start memory profiling
 	pp := profile.Start(
 		profile.MemProfile, profile.ProfilePath("./pprof.out"),

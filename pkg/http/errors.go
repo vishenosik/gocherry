@@ -79,7 +79,6 @@ type HandlerWithError func(w http.ResponseWriter, r *http.Request) error
 
 func (h HandlerWithError) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := h(w, r); err != nil {
-
 		switch e := err.(type) {
 		case *httpError:
 			SendErrors(w, e.statusCode, err)

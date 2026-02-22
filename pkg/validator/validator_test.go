@@ -8,7 +8,6 @@ import (
 )
 
 func Test_UUID4(t *testing.T) {
-
 	UUID := uuid.New().String()
 	err := UUID4(UUID)
 	assert.NoError(t, err)
@@ -18,5 +17,4 @@ func Test_UUID4(t *testing.T) {
 
 	err = UUID4("dfvfvdfv")
 	assert.Error(t, err)
-
 }

@@ -25,7 +25,6 @@ func (t *T) Run(name string, f func(t *testing.T)) bool {
 }
 
 func TestFlagsErrors(_t *testing.T) {
-
 	t := &T{_t}
 
 	t.Run("unknown flag", func(t *testing.T) {
@@ -48,7 +47,6 @@ func TestFlagsErrors(_t *testing.T) {
 }
 
 func TestConfigFlags(_t *testing.T) {
-
 	t := &T{_t}
 
 	t.Run("config info", func(t *testing.T) {
@@ -61,7 +59,6 @@ func TestConfigFlags(_t *testing.T) {
 	})
 
 	t.Run("config gen file", func(t *testing.T) {
-
 		const filename = "config.env"
 
 		file, err := os.CreateTemp("", filename)
@@ -79,9 +76,7 @@ func TestConfigFlags(_t *testing.T) {
 		config, err := os.ReadFile(file.Name())
 		require.NoError(t, err)
 		require.Equal(t, configInfo, string(config))
-
 	})
-
 }
 
 type TestConfig struct {

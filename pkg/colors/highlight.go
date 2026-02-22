@@ -10,18 +10,18 @@ import (
 	"strings"
 )
 
-var (
-	// NumberRegex matches standalone numbers (both integers and floats) while ignoring:
-	// 	- Numbers embedded in words (e.g., "abc123")
-	// 	- Numbers in UUIDs (e.g., "d72be13c-9a0a-4df9-8475-d0f4b0701248")
-	// Pattern breakdown:
-	//   (^|\s)    - Start of string or whitespace
-	//   (\d+      - One or more digits
-	//   (?:\.\d+)? - Optional decimal part
-	//   )         - End of number capture
-	//   (\s|$|[^\w-]) - Followed by whitespace, end of string, or non-word character (except hyphen)
-	NumberRegex = regexp.MustCompile(`(^|\s)(\d+(?:\.\d+)?)(\s|$|[^\w-])`)
-)
+// NumberRegex matches standalone numbers (both integers and floats) while ignoring:
+//   - Numbers embedded in words (e.g., "abc123")
+//   - Numbers in UUIDs (e.g., "d72be13c-9a0a-4df9-8475-d0f4b0701248")
+//
+// Pattern breakdown:
+//
+//	(^|\s)    - Start of string or whitespace
+//	(\d+      - One or more digits
+//	(?:\.\d+)? - Optional decimal part
+//	)         - End of number capture
+//	(\s|$|[^\w-]) - Followed by whitespace, end of string, or non-word character (except hyphen)
+var NumberRegex = regexp.MustCompile(`(^|\s)(\d+(?:\.\d+)?)(\s|$|[^\w-])`)
 
 // Higlighter provides text highlighting capabilities for numbers and keywords.
 type Higlighter struct {

@@ -45,7 +45,6 @@ type Header interface {
 }
 
 func ConfigInfoEnv(writer io.Writer, structs ...any) {
-
 	structs = append(structs, Structs()...)
 
 	writeHeader := func(header string) {
@@ -92,7 +91,6 @@ func (i *indentWrapper) Bytes() []byte {
 }
 
 func genEnvConfig(cfg any) []byte {
-
 	_type := reflect.TypeOf(cfg)
 
 	if _type.Kind() == reflect.Interface {
@@ -116,7 +114,6 @@ func genEnvConfig(cfg any) []byte {
 }
 
 func genEnvConfigRecursively(writer io.Writer, _type reflect.Type) {
-
 	for i := range _type.NumField() {
 
 		field := _type.Field(i)
@@ -144,5 +141,4 @@ func genEnvConfigRecursively(writer io.Writer, _type reflect.Type) {
 		writer.Write([]byte("\n"))
 
 	}
-
 }

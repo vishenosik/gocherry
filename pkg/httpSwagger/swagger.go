@@ -176,7 +176,6 @@ func newConfig(configFns ...func(*Config)) *Config {
 
 // Handler wraps `http.Handler` into `http.HandlerFunc`.
 func Handler(configFns ...func(*Config)) http.HandlerFunc {
-
 	config := newConfig(configFns...)
 
 	// create a template with name
@@ -211,7 +210,12 @@ func Handler(configFns ...func(*Config)) http.HandlerFunc {
 
 		switch path {
 		case "index.html":
-			_ = index.Execute(w, config)
+			err:= index.Execute(w, config)
+			if err!=nil{
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+
+				return
+			}
 		case "doc.json":
 			doc, err := swag.ReadDoc(config.InstanceName)
 			if err != nil {

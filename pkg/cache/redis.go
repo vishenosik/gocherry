@@ -70,7 +70,6 @@ func newRedisCache(opts ...RedisOption) (*RedisCache, error) {
 }
 
 func newRedisCacheConfig(config RedisConfig, opts ...RedisOption) (*RedisCache, error) {
-
 	if err := validateRedisConfig(config); err != nil {
 		return nil, err
 	}

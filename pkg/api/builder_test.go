@@ -23,7 +23,6 @@ var TestingTable = []struct {
 }
 
 func Test_BuildApi(t *testing.T) {
-
 	t.Helper()
 	t.Parallel()
 
@@ -36,7 +35,6 @@ func Test_BuildApi(t *testing.T) {
 }
 
 func Test_ApiV1(t *testing.T) {
-
 	t.Helper()
 	t.Parallel()
 

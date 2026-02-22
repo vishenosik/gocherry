@@ -32,7 +32,6 @@ type Swagger struct {
 }
 
 func NewSwagger(spec *swag.Spec) *Swagger {
-
 	var envConf ConfigEnv
 	if err := config.ReadConfigEnv(&envConf); err != nil {
 		log.Println("init http server: failed to read config", logs.Error(err))

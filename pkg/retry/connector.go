@@ -29,10 +29,8 @@ func NewConnector(conn Connector, opts ...ConnectorOption) *connector {
 }
 
 func (c *connector) Retry(ctx context.Context) error {
-
 	backoff := NewFibonacci(1*time.Second, time.Second*5)
 	if err := Do(ctx, backoff, func(ctx context.Context) error {
-
 		c.log.Info("trying to connect")
 
 		if err := c.conn.Connect(ctx); err != nil {
@@ -54,7 +52,6 @@ func (c *connector) Retry(ctx context.Context) error {
 
 		c.log.Info("connected successfuly")
 		return nil
-
 	}); err != nil {
 		return err
 	}

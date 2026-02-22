@@ -8,7 +8,6 @@ import (
 )
 
 func Test_ReturnFailWithError(t *testing.T) {
-
 	op := "op"
 	Err := errors.New("test error")
 

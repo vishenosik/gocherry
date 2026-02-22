@@ -60,7 +60,6 @@ func NewSqliteStore(opts ...SqliteStoreOption) (*SqliteStore, error) {
 }
 
 func NewSqliteStoreConfig(conf SqliteConfig, opts ...SqliteStoreOption) (*SqliteStore, error) {
-
 	if err := validateSqliteConfig(conf); err != nil {
 		return nil, err
 	}
@@ -119,7 +118,6 @@ func WithMigration(
 }
 
 func SqliteUniqueError(err error, mapper map[string]string) error {
-
 	if !strings.Contains(err.Error(), "UNIQUE constraint failed") {
 		return nil
 	}

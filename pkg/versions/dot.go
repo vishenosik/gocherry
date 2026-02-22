@@ -6,9 +6,7 @@ import (
 	"sort"
 )
 
-var (
-	ErrDotFormat = errors.New("version must be in format MAJOR.MINOR")
-)
+var ErrDotFormat = errors.New("version must be in format MAJOR.MINOR")
 
 type DotVersion struct {
 	Major int
@@ -40,7 +38,6 @@ func (v DotVersion) String() string {
 }
 
 func (v DotVersion) In(v1, v2 DotVersion) bool {
-
 	lower, upper := v1, v2
 	if v1.Major > v2.Major || (v1.Major == v2.Major && v1.Minor > v2.Minor) {
 		lower, upper = upper, lower
@@ -55,7 +52,6 @@ func (v DotVersion) In(v1, v2 DotVersion) bool {
 		(v.Major == lower.Major && v.Minor < lower.Minor) ||
 		(v.Major == upper.Major && v.Minor > upper.Minor) {
 		return false
-
 	}
 	return true
 }
@@ -84,12 +80,10 @@ func (v1 DotVersion) GTE(v2 DotVersion) bool {
 }
 
 func LatestDotVersion(versions ...DotVersion) DotVersion {
-
 	// Sort versions in descending order
 	sort.Slice(versions, func(i, j int) bool {
 		return versions[i].GTE(versions[j])
 	})
 
 	return versions[0]
-
 }

@@ -62,7 +62,6 @@ func SetupLogger() *slog.Logger {
 }
 
 func SetupLoggerConf(conf Config) *slog.Logger {
-
 	if err := conf.Validate(); err != nil {
 		log.Println(err)
 	}

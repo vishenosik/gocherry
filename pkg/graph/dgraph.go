@@ -29,7 +29,6 @@ type DgraphConfig struct {
 // and gRPC server details. The connection uses insecure transport credentials.
 // Returns the client or an error if connection fails.
 func NewClientCtx(ctx context.Context, config DgraphConfig) (*Client, error) {
-
 	client, err := dgo.NewClient(
 		config.GrpcServer.String(),
 		// add Dgraph ACL credentials
@@ -52,7 +51,6 @@ func NewClientCtx(ctx context.Context, config DgraphConfig) (*Client, error) {
 // Returns an error if migration fails.
 
 func (cli *Client) Migrate(migrations fs.FS) error {
-
 	migrator, err := migrate.NewDgraphMigratorContext(
 		context.TODO(),
 		migrate.Config{

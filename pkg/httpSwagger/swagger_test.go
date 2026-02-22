@@ -40,7 +40,6 @@ func (s *mockedSwag) ReadDoc() string {
 }
 
 func TestWrapHandler(t *testing.T) {
-
 	tests := []struct {
 		RootFolder   string
 		InstanceName string
@@ -199,7 +198,6 @@ func TestPersistAuthorization(t *testing.T) {
 }
 
 func TestConfigURL(t *testing.T) {
-
 	type fixture struct {
 		desc  string
 		cfgfn func(c *Config)
@@ -293,7 +291,6 @@ func TestConfigURL(t *testing.T) {
 }
 
 func TestUIConfigOptions(t *testing.T) {
-
 	type fixture struct {
 		desc string
 		cfg  *Config

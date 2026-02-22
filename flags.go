@@ -10,9 +10,7 @@ import (
 	"github.com/vishenosik/gocherry/pkg/config"
 )
 
-var (
-	ErrSuccessExit = errors.New("success and exit with code 0")
-)
+var ErrSuccessExit = errors.New("success and exit with code 0")
 
 type flagset struct {
 	writer io.Writer
@@ -20,7 +18,6 @@ type flagset struct {
 }
 
 func (f *flagset) Parse(arguments []string) error {
-
 	print := func(msg string) {
 		f.SetOutput(f.writer)
 		f.writer.Write([]byte(msg + "\nUsage of config flags\n"))
@@ -50,7 +47,6 @@ func AppFlags(writer io.Writer) func(*flagset) {
 }
 
 func ConfigFlags(writer io.Writer, structs ...any) func(*flagset) {
-
 	return func(f *flagset) {
 		f.BoolFunc("config.info", "Show config schema information", FlagConfigInfoEnv(writer, structs...))
 		f.Func("config.gen", "Generate config schema", FlagConfigGenEnv(structs...))
@@ -87,7 +83,6 @@ func Flags(writer io.Writer, args []string, flagsets ...func(*flagset)) {
 }
 
 func parseFlags(writer io.Writer, args []string, flagsets ...func(*flagset)) error {
-
 	flags := flag.NewFlagSet("app flags", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 

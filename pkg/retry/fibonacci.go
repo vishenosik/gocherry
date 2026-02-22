@@ -22,7 +22,7 @@ type fibonacciBackoff struct {
 //
 // Once it overflows, the function constantly returns the maximum time.Duration
 // for a 64-bit integer.
-func NewFibonacci(base time.Duration, maxDuration time.Duration) *fibonacciBackoff {
+func NewFibonacci(base, maxDuration time.Duration) *fibonacciBackoff {
 	if base <= 0 {
 		base = defaultBase
 	}

@@ -8,7 +8,6 @@ import (
 )
 
 func Test_buildOperation(t *testing.T) {
-
 	t.Helper()
 	t.Parallel()
 
@@ -18,7 +17,6 @@ func Test_buildOperation(t *testing.T) {
 }
 
 func Test_ServicesOperation(t *testing.T) {
-
 	t.Helper()
 	t.Parallel()
 

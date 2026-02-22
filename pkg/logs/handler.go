@@ -72,7 +72,6 @@ func NewHandler(opts ...HandlerOption) *Handler {
 }
 
 func (h *Handler) Handle(ctx context.Context, rec slog.Record) error {
-
 	var builder strings.Builder
 
 	builder.WriteString(fmt.Sprintf("[%s] ", rec.Time.Format(timeFormat)))
@@ -194,7 +193,6 @@ func suppressDefaultAttrs(next nextFunc) nextFunc {
 }
 
 func (h *Handler) computeAttrs(ctx context.Context, rec slog.Record) (attrs, error) {
-
 	h.mutex.Lock()
 	defer func() {
 		h.buf.Reset()

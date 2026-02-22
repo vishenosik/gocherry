@@ -20,7 +20,6 @@ func (t *T) Run(name string, f func(t *testing.T)) bool {
 }
 
 func TestConfigInfoEnv(_t *testing.T) {
-
 	t := &T{_t}
 
 	t.Run("Straight register", func(t *testing.T) {
@@ -52,7 +51,6 @@ func TestConfigInfoEnv(_t *testing.T) {
 		ConfigInfoEnv(&buf)
 		require.Equal(t, "", buf.String())
 	})
-
 }
 
 type TestConfig struct {
